@@ -1,6 +1,6 @@
 # TTK4851
 
-## Object reconition
+## Object recognition
 
 ## Control system
 
