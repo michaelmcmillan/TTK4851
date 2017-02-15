@@ -1,4 +1,5 @@
-numpy
-matplotlib
-scipy
-skimage
+nxt-python==2.2.2
+#numpy
+#matplotlib
+#scipy
+#skimage
