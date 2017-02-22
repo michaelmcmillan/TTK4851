@@ -1,8 +1,9 @@
-from unittest import TestCase
-import lightblue
+from unittest import TestCase, skip
+#import lightblue
 
 class TestLightBlue(TestCase):
 
+    @skip('does not work on osx')
     def test_light_blue(self):
 
         # ask user to choose the device to connect to
