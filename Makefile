@@ -10,7 +10,7 @@ TEST_DIR=./test
 MODULES=$(SRC_DIR):$(TEST_DIR)
 
 # Tests
-TEST_FILES=*_test.py
+TEST_FILES=test_*.py
 UNITTEST_FLAGS=-m unittest discover -p $(TEST_FILES) -s
 
 # Bootstrapers
