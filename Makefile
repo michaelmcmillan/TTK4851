@@ -1,11 +1,17 @@
 # Targets
 install: pip-install
+unit-test: test
 .PHONY: install test
 
 # Directories
 SRC_DIR=./src
 ENV_DIR=./env
+TEST_DIR=./test
 MODULES=$(SRC_DIR):$(TEST_DIR)
+
+# Tests
+TEST_FILES=*_test.py
+UNITTEST_FLAGS=-m unittest discover -p $(TEST_FILES) -s
 
 # Bootstrapers
 REQUIREMENTS=./requirements.txt
@@ -18,6 +24,9 @@ SYSTEM_VIRTUALENV=$(shell which virtualenv)
 
 PIP=$(ENV_DIR)/bin/pip
 PYTHON=$(ENV_DIR)/bin/python
+
+test:
+	@$(PYTHON) $(UNITTEST_FLAGS) $(TEST_DIR)
 
 # Environment variables
 export PYTHONPATH=$(MODULES)
