@@ -30,7 +30,7 @@ class Walker(object):
 
 
     ''' Lets the agent move forward or backwards for the given time in seconds and with the speed/power given '''
-    def move(self, seconds=1, speed=100):
+    def move(self, seconds, speed):
         if self.motor:
             for motor in self.wheels:
                 motor.run(power=speed)
@@ -40,7 +40,7 @@ class Walker(object):
         else:
             print("You have no motors!")
     ''' Makes the agent turn for a given amount of time in seconds, and with the given speed/power '''
-    def turn(self, seconds=1, speed=100):
+    def turn(self, seconds, speed):
         if self.motor:
             self.wheels[0].run(power=speed)
             self.wheels[1].run(power=-speed)

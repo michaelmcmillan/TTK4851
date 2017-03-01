@@ -1,5 +1,11 @@
 nxt-python==2.2.2
+git+ssh://git@github.com/walac/pyusb.git
+
+# OSX must install this library and X-Code with gcc.
+pyobjc==3.2.1
+
 #numpy
 #matplotlib
 #scipy
 #skimage
+#git+ssh://git@github.com/0-1-0/lightblue-0.4.git
