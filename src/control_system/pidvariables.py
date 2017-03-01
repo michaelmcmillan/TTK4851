@@ -1,5 +1,5 @@
 import math
-import nxt
+import nxt_functions
 
 class PidVariables:
 
@@ -33,7 +33,7 @@ class PidVariables:
 
     def get_ang_robot(self):
         self.ang_robot = 0
-        self.ang_robot = nxt.get_compass()
+        self.ang_robot = nxt_functions.get_compass()
         return self.ang_robot
 
     # Shift 1D coordinate system
