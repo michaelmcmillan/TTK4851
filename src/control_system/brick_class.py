@@ -2,8 +2,12 @@ from time import sleep
 from nxt.brick import Brick
 from nxt.locator import find_one_brick
 from nxt.motor import Motor, PORT_A, PORT_B
+<<<<<<< HEAD
 from nxt.sensor import Ultrasonic, PORT_1
 from nxt.sensor import hitechnic, PORT_2            #TEST
+=======
+from nxt.sensor import Ultrasonic, PORT_1, MSCompassv2, PORT_2, PORT_3
+>>>>>>> 2f4a7f8f1012d62adf30fd403d195d3a746a1e98
 
 ''' Object for a simple agent using the NXT interface. Makes it possible for th agent to move and turn based on inputs  '''
 class Walker(object):
@@ -11,6 +15,7 @@ class Walker(object):
     def __init__(self, brick="NXT"):
         if isinstance(brick, basestring):
             brick = find_one_brick(name=brick)
+        self.brick = brick
         self.motor = True
         self.sensor = True
         try:
@@ -22,13 +27,18 @@ class Walker(object):
         except:
             self.motor = False
             print("No motors detected!")
-        try:
-            self.bat_eyes = Ultrasonic(brick, PORT_1)
-        except Exception as e:
-            self.sensor = False
-            print(e)
-            print("No sensor found")
+        #try:
+            #self.bat_eyes = Ultrasonic(brick, PORT_1)
+        #except Exception as e:
+            #self.sensor = False
+            #print("No sensor found")
 
+    '''Retrieve compass data'''
+    def ultrasonic(self):
+        us = Ultrasonic(self.brick, PORT_3)
+        return us.get_distance()
+
+<<<<<<< HEAD
         # Compass EXPERIMENTS
         try:
             self.read_compass = hitechnic.Compass(brick, PORT_2)
@@ -37,6 +47,12 @@ class Walker(object):
             print(e)
             print("No sensor found")
 
+=======
+    '''Retrieve compass data'''
+    def compass(self):
+        compass = MSCompassv2(self.brick, PORT_3)
+        return compass
+>>>>>>> 2f4a7f8f1012d62adf30fd403d195d3a746a1e98
 
     ''' Lets the agent move forward or backwards for the given time in seconds and with the speed/power given '''
     def move(self, seconds, speed):
