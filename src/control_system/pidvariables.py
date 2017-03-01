@@ -2,7 +2,7 @@ import math
 
 class PidVariables:
 
-    def __init__(self, tolerated_ang_offset):
+    def __init__(self):
 
         # 1D
         self.dist_ref = 0
@@ -21,29 +21,26 @@ class PidVariables:
         self.ref = 0
         self.robot = 0
 
-        self.tolerated_ang_offset = tolerated_ang_offset
-
-    def set_new_waypoint(self):
-        #new xref and yref
+    def set_new_waypoint(self):                                                 # should alter the waypoint for the posiston
+        # TODO: new xref and yref from matrix
+        self.xpos_ref = 0
+        self.ypos_ref = 0
         pass
 
-    def set_ang_ref(self):
+    def get_ang_ref(self):
+
         adj = self.xpos_ref - self.xpos_robot                                   # Update varibles before use
         opp = self.ypos_ref - self.ypos_robot
         self.ang_ref = math.degrees(math.atan2(opp, adj))
+        return self.ang_ref
 
     def get_ang_robot(self):
-        self.ang_robot = 0                                                      # get value from compass
+        self.ang_robot = 0
+        # TODO: get value from compass
         return self.ang_robot
 
     # Shift 1D coordinate system
     def get_dist_robot(self):
-        # Get 2D coordinates
-        self.xpos_robot = 0                                                     # get value from image
-        self.ypos_robot = 0                                                     # get value from image
-        self.xpos_ref = 0
-        self.ypos_ref = 0
-
         # Find distance from robot to waypoint
         adj = self.xpos_ref - self.xpos_robot
         opp = self.ypos_ref - self.ypos_robot
@@ -53,12 +50,13 @@ class PidVariables:
 
         return self.dist_robot
 
-    #
-    def get_pos_robot(self):
-        self.xpos_robot = 0                                                     # get value from image
-        self.ypos_robot = 0                                                     # get value from image
-
-
+    # Maybe not needed??
+    def update_coordinates(self):
+        # TODO: get robot pos from matrix
+        self.xpos_robot = 0  # get value from image
+        self.ypos_robot = 0  # get value from image
+        self.xpos_ref = 0
+        self.ypos_ref = 0
 
 
 

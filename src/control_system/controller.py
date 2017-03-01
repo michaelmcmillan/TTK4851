@@ -3,7 +3,6 @@ import time
 class PID:
     """PID Controller
     """
-
     def __init__(self, P=0.2, I=0.0, D=0.0):
 
         self.Kp = P
@@ -64,8 +63,7 @@ class PID:
             self.last_error = error
 
             self.output = self.PTerm + (self.Ki * self.ITerm) + (self.Kd * self.DTerm)
-            self.test += 1
-            print(self.test)
+            return self.output
 
     def setKp(self, proportional_gain):
         """Determines how aggressively the PID reacts to the current error with setting Proportional Gain"""
