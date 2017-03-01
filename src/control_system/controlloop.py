@@ -1,6 +1,7 @@
 import math
 import controller
 import pidvariables
+import nxt_functions
 
 
 # Create PID variables
