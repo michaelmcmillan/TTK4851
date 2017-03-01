@@ -1,7 +1,7 @@
 import math
 import controller
 import pidvariables
-import brick_class
+from brick_class import Walker
 import nxt_functions
 
 # Create flags for desicions
@@ -22,7 +22,6 @@ posistion_controller.setSetpoint(0)
 angle_controller = controller.PID(2.5, .1, 0)
 angle_controller.setSampleTime(SAMPLE_TIME)
 
-walker=brick_class.Walker()
 
 
 while True:
@@ -40,14 +39,14 @@ while True:
     if ang_offset > THREASHOLD_ANG:
         posistion_controller.clear()                                    # Reset posistion controller
         ang_ctrl_output = angle_controller.update(ang_rob)# Update controller
-        walker.turn(SAMPLE_TIME,ang_ctrl_output)
+        #walker.turn(SAMPLE_TIME,ang_ctrl_output)
 
 
     # Posistion controller
     else:
         angle_controller.clear()                                        # Reset angle controller
         pos_ctrl_output = posistion_controller.update(PIDvar.get_dist_robot)              # Update posistion controller
-        walker.move(SAMPLE_TIME,pos_ctrl_output)
+        #walker.move(SAMPLE_TIME,pos_ctrl_output)
         # TODO: apply controller output to robot
 
     # Check waypoint (Without interupt)

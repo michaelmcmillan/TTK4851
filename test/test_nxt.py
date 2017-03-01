@@ -7,7 +7,7 @@ class TestNXT(TestCase):
         walker = Walker()
         from time import sleep
         while True:
-            #sleep(0.03)
+            sleep(0.03)
             distance = walker.ultrasonic()
             print(distance)
 
