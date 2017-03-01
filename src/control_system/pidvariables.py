@@ -47,7 +47,6 @@ class PidVariables:
 
         return self.dist_robot
 
-    # Maybe not needed??
     def update_coordinates(self):
         # TODO: get robot pos from matrix
         self.xpos_robot = 0  # get value from image
