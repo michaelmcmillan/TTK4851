@@ -1,8 +1,8 @@
 from time import sleep
-from nxt_functions.brick import Brick
-from nxt_functions.locator import find_one_brick
-from nxt_functions.motor import Motor, PORT_A, PORT_B
-from nxt_functions.sensor import Ultrasonic, PORT_1
+from nxt.brick import Brick
+from nxt.locator import find_one_brick
+from nxt.motor import Motor, PORT_A, PORT_B
+from nxt.sensor import Ultrasonic, PORT_1
 
 ''' Object for a simple agent using the NXT interface. Makes it possible for th agent to move and turn based on inputs  '''
 class Walker(object):
