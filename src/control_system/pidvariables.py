@@ -1,4 +1,6 @@
 import math
+from unittest import TestCase, skip
+from src.control_system.brick_class import Walker
 
 class PidVariables:
 
@@ -18,8 +20,7 @@ class PidVariables:
         self.ypos_ref = 0
 
 
-        self.ref = 0
-        self.robot = 0
+        walker = Walker()
 
     def set_new_waypoint(self):                                                 # should alter the waypoint for the posiston
         # TODO: new xref and yref from matrix
@@ -36,7 +37,7 @@ class PidVariables:
 
     def get_ang_robot(self):
         self.ang_robot = 0
-        # TODO: get value from compass
+        self.ang_robot = walker.compass()
         return self.ang_robot
 
     # Shift 1D coordinate system
