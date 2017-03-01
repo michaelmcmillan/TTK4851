@@ -19,7 +19,6 @@ class PidVariables:
         self.xpos_ref = 0
         self.ypos_ref = 0
 
-
         walker = Walker()
 
     def set_new_waypoint(self):                                                 # should alter the waypoint for the posiston
@@ -37,7 +36,7 @@ class PidVariables:
 
     def get_ang_robot(self):
         self.ang_robot = 0
-        self.ang_robot = walker.compass()
+        self.ang_robot = self.walker.compass()
         return self.ang_robot
 
     # Shift 1D coordinate system
