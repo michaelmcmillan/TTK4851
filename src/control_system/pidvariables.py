@@ -1,6 +1,5 @@
 import math
-from unittest import TestCase, skip
-from src.control_system.brick_class import Walker
+import nxt
 
 class PidVariables:
 
@@ -19,8 +18,6 @@ class PidVariables:
         self.xpos_ref = 0
         self.ypos_ref = 0
 
-        walker = Walker()
-
     def set_new_waypoint(self):                                                 # should alter the waypoint for the posiston
         # TODO: new xref and yref from matrix
         self.xpos_ref = 0
@@ -36,7 +33,7 @@ class PidVariables:
 
     def get_ang_robot(self):
         self.ang_robot = 0
-        self.ang_robot = self.walker.compass()
+        self.ang_robot = nxt.get_compass()
         return self.ang_robot
 
     # Shift 1D coordinate system
