@@ -1,5 +1,5 @@
 from unittest import TestCase, skip
-from control_system.brick_class import Walker
+from src.control_system.brick_class import Walker
 
 class TestNXT(TestCase):
 
