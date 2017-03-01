@@ -1,4 +1,5 @@
 import math
+import brick_class
 import nxt_functions
 
 class PidVariables:
@@ -17,6 +18,7 @@ class PidVariables:
         self.ypos_robot = 0
         self.xpos_ref = 0
         self.ypos_ref = 0
+        self.walker = brick_class.Walker()
 
     def set_new_waypoint(self):                                                 # should alter the waypoint for the posiston
         # TODO: new xref and yref from matrix
@@ -45,7 +47,9 @@ class PidVariables:
         #In 1D: waypoint = 0, robot = distance to waypoint(origo)
         self.dist_robot = math.sqrt(math.pow(adj, 2) + math.pow(opp, 2))
 
-        return self.dist_robot
+        # Testing with utrasonic as distance measurement
+        test = self.walker.bat_eyes()
+        return self.test
 
     def update_coordinates(self):
         # TODO: get robot pos from matrix

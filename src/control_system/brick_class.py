@@ -3,6 +3,7 @@ from nxt.brick import Brick
 from nxt.locator import find_one_brick
 from nxt.motor import Motor, PORT_A, PORT_B
 from nxt.sensor import Ultrasonic, PORT_1
+from nxt.sensor import hitechnic, PORT_2            #TEST
 
 ''' Object for a simple agent using the NXT interface. Makes it possible for th agent to move and turn based on inputs  '''
 class Walker(object):
@@ -23,6 +24,14 @@ class Walker(object):
             print("No motors detected!")
         try:
             self.bat_eyes = Ultrasonic(brick, PORT_1)
+        except Exception as e:
+            self.sensor = False
+            print(e)
+            print("No sensor found")
+
+        # Compass EXPERIMENTS
+        try:
+            self.read_compass = hitechnic.Compass(brick, PORT_2)
         except Exception as e:
             self.sensor = False
             print(e)
@@ -57,5 +66,9 @@ class Walker(object):
         else:
             print("You have no eyes!")
             return -1
+    # TEST
+    def read_compass(self):
+        return self.compass.get_sample()
+
 if __name__=="__main__":
     b = Walker()
