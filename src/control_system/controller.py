@@ -71,6 +71,10 @@ class PID:
                 self.output = 100
             if self.output < -100:
                 self.output = -100
+            if self.output > 0 and self.output < 70:
+                self.output = 70
+            if self.output < 0 and self.output > -70:
+                self.output = -70
 
         return self.output
 
