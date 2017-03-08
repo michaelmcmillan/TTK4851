@@ -3,6 +3,7 @@ from src.control_system.brick_class import Walker
 
 class TestNXT(TestCase):
 
+    @skip('')
     def test_the_walker_can_retrieve_US(self):
         walker = Walker()
         from time import sleep
@@ -11,6 +12,7 @@ class TestNXT(TestCase):
             distance = walker.ultrasonic()
             print(distance)
 
+    @skip('')
     def xtest_the_walker_can_move_forward(self):
         walker = Walker()
         #walker.move()
