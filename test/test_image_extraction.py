@@ -1,4 +1,3 @@
-from httplib import HTTPConnection
 from unittest import TestCase, skip
 from os.path import join, dirname
 from video.extractor import ImageStreamExtractor
@@ -24,11 +23,6 @@ class TestImageExtraction(TestCase):
             self.assertEqual(latest_image.name, '40b437')
 
     def test_it_finds_2_jpegs_in_the_http_stream(self):
-        conn = HTTPConnection('192.168.0.100')
-        authorization = {'Authorization': 'Basic YWRtaW46'} # admin, blank
-        conn.request('GET', '/video/mjpg.cgi?profileid=3', headers=authorization)
-        real_stream = conn.getresponse()
-
-        extractor = ImageStreamExtractor(stream=real_stream)
+        extractor = ImageStreamExtractor()
         images = extractor.extract_images()
         self.assertEqual(len(images), 2)

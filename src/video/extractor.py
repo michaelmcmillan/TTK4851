@@ -1,5 +1,6 @@
 import hashlib
 from base64 import b64encode
+from httplib import HTTPConnection
 
 class Image:
 
@@ -19,13 +20,20 @@ class Image:
 
 class ImageStreamExtractor:
 
-    def __init__(self, stream):
-        self.stream = stream
+    def __init__(self, stream=None):
+        self.stream = stream \
+            if stream else self.get_stream_from_camera()
 
     def extract_latest_image(self):
         recent_images = self.extract_images()
         latest_image = recent_images[len(recent_images) - 1]
         return latest_image
+
+    def get_stream_from_camera(self):
+        conn = HTTPConnection('192.168.0.100')
+        authorization = {'Authorization': 'Basic YWRtaW46'} # admin, blank
+        conn.request('GET', '/video/mjpg.cgi?profileid=3', headers=authorization)
+        return conn.getresponse()
 
     def extract_images(self):
         images = []
