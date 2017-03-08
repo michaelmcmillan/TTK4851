@@ -24,44 +24,46 @@ class ImageStreamExtractor:
         self.stream = stream \
             if stream else self.get_stream_from_camera()
 
-    def extract_latest_image(self):
-        recent_images = self.extract_images()
-        latest_image = recent_images[len(recent_images) - 1]
-        return latest_image
-
     def get_stream_from_camera(self):
         conn = HTTPConnection('192.168.0.100')
         authorization = {'Authorization': 'Basic YWRtaW46'} # admin, blank
         conn.request('GET', '/video/mjpg.cgi?profileid=3', headers=authorization)
         return conn.getresponse()
 
-    def extract_images(self):
-        images = []
-        start, stop = None, None
-        chunk = self.stream.read(1024*5)
+    @staticmethod
+    def get_data(src, chunk_size=1024*10):
+        d = src.read(chunk_size)
+        while d:
+            yield d
+            d = src.read(chunk_size)
 
-        for byte_number, byte in enumerate(chunk):
+    def extract_image(self):
+        feed_me = False
+        data = self.get_data(self.stream)
+        image = ''
 
-            # START image
-            if  chunk[byte_number]   == '\xff' \
-            and chunk[byte_number+1] == '\xd8' \
-            and chunk[byte_number+2] == '\xff' \
-            and chunk[byte_number+3] == '\xdb':
-                start = byte_number
+        for chunk in data:
 
-            # EOF image
-            if  chunk[byte_number]   == '\xff' \
-            and chunk[byte_number+1] == '\xd9' \
-            and chunk[byte_number+2] == '\xff' \
-            and chunk[byte_number+3] == '\xd9' \
-            and chunk[byte_number+4] == '\x0d' \
-            and chunk[byte_number+5] == '\x0a':
-                stop = byte_number
+            for byte_number, byte in enumerate(chunk):
 
-            # When we have a start and a stop
-            if start and stop:
-                image = Image(data=chunk[start:stop])
-                images.append(image)
-                start, stop = None, None 
+                # START image
+                if  chunk[byte_number]   == '\xff' \
+                and chunk[byte_number+1] == '\xd8' \
+                and chunk[byte_number+2] == '\xff' \
+                and chunk[byte_number+3] == '\xdb':
+                    feed_me = True 
 
-        return images
+                # EOF image
+                if  chunk[byte_number]   == '\xff' \
+                and chunk[byte_number+1] == '\xd9' \
+                and chunk[byte_number+2] == '\xff' \
+                and chunk[byte_number+3] == '\xd9' \
+                and chunk[byte_number+4] == '\x0d' \
+                and chunk[byte_number+5] == '\x0a':
+                    feed_me = False
+
+                if feed_me:
+                    image += byte
+
+                if image and not feed_me:
+                    return Image(data=image)
