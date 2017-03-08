@@ -2,7 +2,7 @@ import math
 import controller
 import pidvariables
 from brick_class import Walker
-import nxt_functions
+import robot
 
 # Create flags for desicions
 waypoint_flag = False

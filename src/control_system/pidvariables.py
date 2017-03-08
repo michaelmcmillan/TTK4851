@@ -1,5 +1,5 @@
 import math
-import nxt_functions
+import robot
 
 class PidVariables:
 
@@ -35,9 +35,9 @@ class PidVariables:
         return 90.0
 
     def get_ang_robot(self):
-        teste = nxt_functions.TestNXT()
+        #teste = nxt_functions.TestNXT()
         self.ang_robot = 0.0
-        self.ang_robot = teste.get_heading()
+        #self.ang_robot = teste.get_heading()
         return self.ang_robot
 
     # Shift 1D coordinate system
@@ -50,8 +50,9 @@ class PidVariables:
         self.dist_robot = math.sqrt(math.pow(adj, 2) + math.pow(opp, 2))
 
         # Testing with utrasonic as distance measurement
-        teste = nxt_functions.TestNXT()
-        test = teste.get_distance()
+        #teste = nxt_functions.TestNXT()
+        #test = teste.get_distance()
+        self.test = 0
         return self.test
 
     def update_coordinates(self):
