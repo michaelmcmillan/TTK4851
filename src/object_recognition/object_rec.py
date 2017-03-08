@@ -3,8 +3,9 @@ import cv2
 from matplotlib import pyplot as plt
 from time import time
 from scipy import ndimage as ndi
+import pickle
 
-def read_image(filepath="test.png"):
+def read_image(filepath="test_mini2.png"):
     image = cv2.imread(filepath)
     return image
 def fill_image(im):
@@ -41,13 +42,13 @@ def find_centers(image, stride_x=10, stride_y=10):
 def segment_image(image):
     image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     kernel = np.ones((3, 3))
-    image = cv2.Canny(image[:,:,2], 50, 130, L2gradient=True)
+    image = cv2.Canny(image[:,:,2], 90, 130, L2gradient=True)
     image = cv2.dilate(image, kernel, iterations=2)
     image = cv2.erode(image, kernel, iterations=1)
     image = fill_image(image)
     label_objects, nb_labels = ndi.label(image)
     sizes = np.bincount(label_objects.ravel())
-    mask_sizes = sizes > 1000
+    mask_sizes = sizes > 100
     mask_sizes[0] = 0
     image = mask_sizes[label_objects]
     centers, labeled_image = find_centers(image)
@@ -67,7 +68,7 @@ def find_robot(image, template):
 if __name__=="__main__":
     start = time()
     image = read_image()
-    template = read_image("robot_template.png")
+    template = read_image("mini_template.png")
     cimage, centers, labeled_image = segment_image(image)
     robot_pos = find_robot(image, template)
     if labeled_image[robot_pos] != 0:
@@ -76,5 +77,7 @@ if __name__=="__main__":
     print(time()-start)
     print robot_pos
     #plt.imshow(labeled_image)
+    #np.save("labeled_matrix", labeled_image)
+    #np.save("binary_matrix", cimage)
     plt.imshow(cimage, cmap="gray")
     plt.show()
