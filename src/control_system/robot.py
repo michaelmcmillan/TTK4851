@@ -12,8 +12,9 @@ from time import sleep
 from nxt.brick import Brick
 from nxt.locator import find_one_brick
 from nxt.motor import Motor, PORT_A, PORT_B, PORT_C
-from nxt.sensor import Light, Sound, Touch, Ultrasonic
+from nxt.sensor import Light, Sound, Touch, Ultrasonic, MSCompassv2
 from nxt.sensor import PORT_1, PORT_2, PORT_3, PORT_4
+
 
 FORTH = 100
 BACK = -100
@@ -39,12 +40,13 @@ class Seng(object):
             brick = find_one_brick(name=brick)
 
         self.brick = brick
-        self.arms = Motor(brick, PORT_A)
-        self.legs = [Motor(brick, PORT_B), Motor(brick, PORT_C)]
+        self.arms = Motor(brick, PORT_C)
+        self.legs = [Motor(brick, PORT_A), Motor(brick, PORT_B)]
 
-        self.touch = Touch(brick, PORT_1)
-        self.sound = Sound(brick, PORT_2)
-        self.light = Light(brick, PORT_3)
+        #self.touch = Touch(brick, PORT_1)
+        #self.sound = Sound(brick, PORT_2)
+        #self.light = Light(brick, PORT_3)
+        self.direction = MSCompassv2(brick, PORT_2)
         self.ultrasonic = Ultrasonic(brick, PORT_4)
 
     def echolocate(self):
@@ -57,10 +59,8 @@ class Seng(object):
         '''
         return self.touch.get_sample()
 
-    def hear(self):
-        r'''Reads the Sound sensor's output.
-        '''
-        return self.sound.get_sample()
+    def compass(self):
+        return self.direction.get_sample
 
     def say(self, line, times=1):
         r'''Plays a sound file named (line + '.rso'), which is expected to be
@@ -116,35 +116,44 @@ class Seng(object):
         sleep(secs)
         self.arms.idle()
 
+robot = Seng()
 
 def wave_and_talk():
     r'''Connects to a nearby Alpha Rex, then commands it to wave its arms and
         play the sound file 'Object.rso'.
     '''
-    robot = Seng()
     robot.wave(1)
     robot.say('Object')
 
+
+def read_ultrasonic():
+    r'''Connects to a nearby Alpha Rex, then commands it to walk forward and
+           then backwards.
+       '''
+    return robot.echolocate()
 
 def walk_forth_and_back():
     r'''Connects to a nearby Alpha Rex, then commands it to walk forward and
         then backwards.
     '''
-    robot = Seng()
     robot.walk(10, FORTH)
     robot.walk(10, BACK)
 
+def walk_forward(speed):
+    robot.walk(0.5, -speed)
 
 def walk_to_object():
     r'''Connects to a nearby Alpha Rex, then commands it to walk until it
         approaches an obstacle, then stop and say 'Object' three times.
     '''
-    robot = Seng()
     while robot.echolocate() > 10:
         robot.walk(1, FORTH)
 
     robot.say('Object', 3)
 
+
+def read_compass():
+    return robot.direction
 
 if __name__ == '__main__':
     walk_to_object()
