@@ -1,8 +1,9 @@
 import math
 import controller
 import pidvariables
+import robot
 from brick_class import Walker
-import nxt_functions
+import robot
 
 # Create flags for desicions
 waypoint_flag = False
@@ -30,23 +31,24 @@ while True:
 
     # Get robot/ref distance and angle
     dist_rob = PIDvar.get_dist_robot()
-    ang_rob = PIDvar.get_ang_robot()                                      # From Compass
-    ang_ref = PIDvar.get_ang_ref()                                        # Calculated from coordinates
-    print(ang_rob)
+    #print(str(dist_rob))
+    ang_rob = robot.read_compass()                                      # From Compass
+    print ang_rob
+    ang_ref = PIDvar.get_ang_ref()                                       # Calculated from coordinates
     ang_offset = math.fabs(ang_rob)-math.fabs(ang_ref)                  # Offset in angle
 
     # Angle controller
     if ang_offset > THREASHOLD_ANG:
         posistion_controller.clear()                                    # Reset posistion controller
-        ang_ctrl_output = angle_controller.update(ang_rob)# Update controller
+        #ang_ctrl_output = angle_controller.update(ang_rob)# Update controller
         #walker.turn(SAMPLE_TIME,ang_ctrl_output)
 
 
     # Posistion controller
     else:
         angle_controller.clear()                                        # Reset angle controller
-        pos_ctrl_output = posistion_controller.update(PIDvar.get_dist_robot)              # Update posistion controller
-        #walker.move(SAMPLE_TIME,pos_ctrl_output)
+        pos_ctrl_output = posistion_controller.update(dist_rob)              # Update posistion controller
+        robot.walk_forward(int(pos_ctrl_output))
         # TODO: apply controller output to robot
 
     # Check waypoint (Without interupt)
@@ -54,4 +56,5 @@ while True:
     if dist_rob < THREASHOLD_POS:                                       #check if robot has reached the waypoint
         PIDvar.set_new_waypoint()
         pass
-
+    #robot.dir()
+    #robot.walk_forth_and_back()
