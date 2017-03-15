@@ -1,9 +1,10 @@
 import time
+import math
 
 class PID:
     """PID Controller
     """
-    def __init__(self, P=0.2, I=0.0, D=0.0):
+    def __init__(self, P, I, D):
 
         self.Kp = P
         self.Ki = I
@@ -12,6 +13,9 @@ class PID:
         self.sample_time = 0.00
         self.current_time = time.time()
         self.last_time = self.current_time
+
+        self.output = 0
+        self.set_point = 0
 
         self.clear()
 
@@ -44,11 +48,9 @@ class PID:
         self.current_time = time.time()
         delta_time = self.current_time - self.last_time
         delta_error = error - self.last_error
-
         if (delta_time >= self.sample_time):
             self.PTerm = self.Kp * error
             self.ITerm += error * delta_time
-
             if (self.ITerm < -self.windup_guard):
                 self.ITerm = -self.windup_guard
             elif (self.ITerm > self.windup_guard):
@@ -63,7 +65,16 @@ class PID:
             self.last_error = error
 
             self.output = self.PTerm + (self.Ki * self.ITerm) + (self.Kd * self.DTerm)
-            return self.output
+
+            # Set restrictions on output
+            if self.output > 100:
+                self.output = 100
+            if self.output < -100:
+                self.output = -100
+            if self.output > -50 and self.output < 50:
+                self.output = 0
+
+        return self.output
 
     def setKp(self, proportional_gain):
         """Determines how aggressively the PID reacts to the current error with setting Proportional Gain"""
