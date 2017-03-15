@@ -12,7 +12,7 @@ from time import sleep
 from nxt.brick import Brick
 from nxt.locator import find_one_brick
 from nxt.motor import Motor, PORT_A, PORT_B, PORT_C
-from nxt.sensor import Light, Sound, Touch, Ultrasonic, MSCompassv2
+from nxt.sensor import Light, Sound, Touch, Ultrasonic, HTCompass
 from nxt.sensor import PORT_1, PORT_2, PORT_3, PORT_4
 
 
@@ -21,14 +21,6 @@ BACK = -100
 
 
 class Seng(object):
-    r'''A high-level controller for the Alpha Rex model.
-
-        This class implements methods for the most obvious actions performable
-        by Alpha Rex, such as walk, wave its arms, and retrieve sensor samples.
-        Additionally, it also allows direct access to the robot's components
-        through public attributes.
-    '''
-
     def __init__(self, brick='NXT'):
         r'''Creates a new Alpha Rex controller.
 
@@ -41,12 +33,10 @@ class Seng(object):
 
         self.brick = brick
         self.arms = Motor(brick, PORT_C)
-        self.legs = [Motor(brick, PORT_A), Motor(brick, PORT_B)]
+        self.left = Motor(brick, PORT_A)
+        self.right = Motor(brick, PORT_B)
 
-        #self.touch = Touch(brick, PORT_1)
-        #self.sound = Sound(brick, PORT_2)
-        #self.light = Light(brick, PORT_3)
-        self.direction = MSCompassv2(brick, PORT_2)
+        self.direction = HTCompass(brick, PORT_2)
         self.ultrasonic = Ultrasonic(brick, PORT_4)
 
     def echolocate(self):
@@ -54,35 +44,10 @@ class Seng(object):
         '''
         return self.ultrasonic.get_sample()
 
-    def feel(self):
-        r'''Reads the Touch sensor's output.
-        '''
-        return self.touch.get_sample()
-
     def compass(self):
-        return self.direction.get_sample
+        return self.direction.get_sample()
 
-    def say(self, line, times=1):
-        r'''Plays a sound file named (line + '.rso'), which is expected to be
-            stored in the brick. The file is played (times) times.
-
-            line
-                The name of a sound file stored in the brick.
-
-            times
-                How many times the sound file will be played before this method
-                returns.
-        '''
-        for i in range(0, times):
-            self.brick.play_sound_file(False, line + '.rso')
-            sleep(1)
-
-    def see(self):
-        r'''Reads the Light sensor's output.
-        '''
-        return self.light.get_sample()
-
-    def walk(self, secs, power=FORTH):
+    def walk_seng(self, secs, power):
         r'''Simultaneously activates the leg motors, causing Alpha Rex to walk.
 
             secs
@@ -95,35 +60,24 @@ class Seng(object):
                 apply, the special values FORTH and BACK provide reasonable
                 defaults. If omitted, FORTH is used.
         '''
-        for motor in self.legs:
-            motor.run(power=power)
+
+        self.left.run(power=power)
+        self.right.run(power=power)
 
         sleep(secs)
+        self.left.idle()
+        self.right.idle()
 
-        for motor in self.legs:
-            motor.idle()
+    def turn_seng(self, secs, power):
+        self.left.run(power=power)
+        self.right.run(power=-power)
 
-    def wave(self, secs, power=100):
-        r'''Make Alpha Rex move its arms.
-
-            secs
-                How long the arms' motor will rotate.
-
-            power
-                The strength effected by the motor. If omitted, (100) is used.
-        '''
-        self.arms.run(power=power)
         sleep(secs)
-        self.arms.idle()
+        self.left.idle()
+        self.right.idle()
+
 
 robot = Seng()
-
-def wave_and_talk():
-    r'''Connects to a nearby Alpha Rex, then commands it to wave its arms and
-        play the sound file 'Object.rso'.
-    '''
-    robot.wave(1)
-    robot.say('Object')
 
 
 def read_ultrasonic():
@@ -139,8 +93,11 @@ def walk_forth_and_back():
     robot.walk(10, FORTH)
     robot.walk(10, BACK)
 
-def walk_forward(speed):
-    robot.walk(0.5, -speed)
+def walk(secs,speed):
+    robot.walk_seng(secs, -speed)
+
+def turn(secs,speed):
+    robot.turn_seng(secs, -speed)
 
 def walk_to_object():
     r'''Connects to a nearby Alpha Rex, then commands it to walk until it
@@ -153,7 +110,7 @@ def walk_to_object():
 
 
 def read_compass():
-    return robot.direction
+    return robot.compass()
 
 if __name__ == '__main__':
     walk_to_object()
