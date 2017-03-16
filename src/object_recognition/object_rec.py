@@ -3,11 +3,12 @@ import cv2
 from matplotlib import pyplot as plt
 from time import time
 from scipy import ndimage as ndi
-import pickle
 
 def read_image(filepath="test_mini2.png"):
     image = cv2.imread(filepath)
     return image
+def byte_to_image(image_data):
+    return cv2.imdecode(np.asarray(bytearray(image_data)), -1)
 def fill_image(im):
     h, w = im.shape[:2]
     mask = np.zeros((h+2, w+2), np.uint8)
@@ -15,7 +16,6 @@ def fill_image(im):
     cv2.floodFill(imf, mask, (0,0), 255)
     im_flodf = cv2.bitwise_not(imf)
     im2 = im | im_flodf
-    print im2.shape
     return im2
 def find_centers(image, stride_x=10, stride_y=10):
     centers = []
@@ -52,7 +52,6 @@ def segment_image(image):
     mask_sizes[0] = 0
     image = mask_sizes[label_objects]
     centers, labeled_image = find_centers(image)
-    print(centers)
     return image, centers, labeled_image
 def find_robot(image, template):
     res  = cv2.matchTemplate(image, template, cv2.TM_CCOEFF)
@@ -64,20 +63,37 @@ def find_robot(image, template):
     coord_y = int(np.mean(np.array([x for x in range(top_left[1], bottom_right[1]+1)])))
     coords = (coord_y, coord_x)
     return coords
+""" Call this function for segmenting an image from a list of bytes  """
+def object_rec_byte(byte_image):
+    image = byte_to_image(byte_im)
+    return object_rec_main(image)
+""" Call this function for segmenting an image from file """
+def object_rec_file(file_name = "test_mini2.png"):
+    image = read_image(file_name)
+    return object_rec_main(image)
 
-if __name__=="__main__":
-    start = time()
-    image = read_image()
-    template = read_image("mini_template.png")
+def object_rec_main(image):
     cimage, centers, labeled_image = segment_image(image)
     robot_pos = find_robot(image, template)
     if labeled_image[robot_pos] != 0:
-        print labeled_image[robot_pos]
+        robot_pos = centers[labeled_image[robot_pos]-1]
+    return robot_pos, cimage, centers, labeled_image
+
+template = read_image("mini_template.png")
+if __name__=="__main__":
+    robot_pos, cimage, centers, labeled_image = object_rec_file()
+    stop = time()
+    """image = read_image()
+    start = time()
+    cimage, centers, labeled_image = segment_image(image)
+    robot_pos = find_robot(image, template)
+    if labeled_image[robot_pos] != 0:
         robot_pos = centers[labeled_image[robot_pos]-1]
     print(time()-start)
     print robot_pos
     #plt.imshow(labeled_image)
     #np.save("labeled_matrix", labeled_image)
     #np.save("binary_matrix", cimage)
-    plt.imshow(cimage, cmap="gray")
-    plt.show()
+    """
+    #plt.imshow(cimage, cmap="gray")
+    #plt.show()
