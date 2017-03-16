@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="844ccd5c-fa29-4644-8bba-28dc9b10d699" name="Default" comment="h">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/control_system/get_sensor_data.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/control_system/pidvariables.py" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/control_system/controlloop.py" afterPath="$PROJECT_DIR$/src/control_system/controlloop.py" />
-    </list>
+    <list default="true" id="844ccd5c-fa29-4644-8bba-28dc9b10d699" name="Default" comment="h" />
     <ignored path="TTK4851.iws" />
     <ignored path=".idea/workspace.xml" />
     <ignored path=".idea/dataSources.local.xml" />
