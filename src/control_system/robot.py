@@ -68,11 +68,28 @@ class Seng(object):
         self.left.idle()
         self.right.idle()
 
+    def walk_seng_start(self, power):
+        self.left.run(power=power)
+        self.right.run(power=power)
+
+    def walk_seng_stop(self):
+        self.left.idle()
+        self.right.idle()
+
     def turn_seng(self, secs, power):
         self.left.run(power=power)
         self.right.run(power=-power)
 
         sleep(secs)
+        self.left.idle()
+        self.right.idle()
+
+    def turn_seng_start(self, power):
+        self.left.run(power=power)
+        self.right.run(power=-power)
+
+
+    def turn_seng_stopp(self):
         self.left.idle()
         self.right.idle()
 
@@ -93,11 +110,37 @@ def walk_forth_and_back():
     robot.walk(10, FORTH)
     robot.walk(10, BACK)
 
+
 def walk(secs,speed):
     robot.walk_seng(secs, -speed)
 
+
+def walk_start(speed):
+    robot.walk_seng_start(-speed)
+
+
+def walk_stop():
+    robot.walk_seng_stop()
+
+
 def turn(secs,speed):
-    robot.turn_seng(secs, -speed)
+    ang = robot.compass()
+    if ang > 180:
+        ang =  ang-360
+
+    if ang > 0:
+        robot.turn_seng(secs, -speed)
+    if ang < 0:
+        robot.turn_seng(secs, speed)
+
+
+def turn_start(speed):
+    robot.turn_seng_start(speed)
+
+
+def turn_stop():
+    robot.turn_seng_stopp()
+
 
 def walk_to_object():
     r'''Connects to a nearby Alpha Rex, then commands it to walk until it

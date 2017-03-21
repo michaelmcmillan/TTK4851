@@ -1,20 +1,23 @@
 import math
 import controller
 import robot
-import time
 
 # Create flags for decisions
 waypoint_flag = False
 THREASHOLD_POS = 2
-THREASHOLD_ANG_MAX = 15
+THREASHOLD_ANG_MAX = 10
 THREASHOLD_ANG_MIN = 5
 THREASHOLD_COORDINATES = 5
 SAMPLE_TIME = 0.1
 ROBOT_LENGHT = 13
+SCALE_FACTOR = 5
+turning_flag = False
+priv_turn = 0
+priv_forward = 0
 
 
 # Create Controllers
-posistion_controller = controller.PID(5.5, 2, 1.5)
+posistion_controller = controller.PID(10, 5, 0)
 posistion_controller.setSampleTime(SAMPLE_TIME)
 posistion_controller.setSetpoint(0)
 
@@ -40,15 +43,9 @@ def get_ang_ref(xpos_ref, ypos_ref, xpos_robot, ypos_robot):
     ang_ref = math.degrees(math.atan2(opp, adj))
     return ang_ref
 
-def ang_offset(ang_rob, ang_ref):
-    #TODO: lag logic for aa skjekke vinkel differense
-    aoff = math.fabs(ang_rob) - math.fabs(ang_ref)
-    return aoff
-
 # Get distance from robot to waypoint in 1D
 def get_dist_robot(xpos_ref, ypos_ref, xpos_robot, ypos_robot):
     # Find distance from robot to waypoint
-
     if math.fabs(xpos_ref - xpos_robot) < THREASHOLD_COORDINATES:
         dist = math.fabs(ypos_ref - ypos_robot)
 
@@ -58,77 +55,93 @@ def get_dist_robot(xpos_ref, ypos_ref, xpos_robot, ypos_robot):
         adj = xpos_ref - xpos_robot
         opp = ypos_ref - ypos_robot
         dist = math.sqrt(math.pow(adj, 2) + math.pow(opp, 2))
-
     # Testing with utrasonic as distance measurement
-    dist_robot = robot.read_ultrasonic()
+    dist_robot = robot.read_ultrasonic() - 10
 
     return dist_robot
 
 
-def controlloop(xrob, yrob, waypoints):
-    global waypoint_flag
+# Correct the compass angle
+def ang_robot():
+    ang = robot.read_compass()
+    if ang > 180:
+        return ang-360
+    else:
+        return ang
 
-    # Remove last waypoint from list
-    if waypoint_flag:
-        waypoints.pop(0)
-        waypoints.pop(0)
-        waypoint_flag = False
+# Update off_cource_flag used to decide what to controll
+def offset(ang_rob, ang_ref):
+    global off_cource_flag
+    ang_off = math.fabs(ang_ref)- math.fabs(ang_rob)
 
-    # Extract correct waypoint
-    xref = waypoints[0]
-    yref = waypoints[1]
-
-    # Get robot/ref distance and angle
-    dist_rob = get_dist_robot(xref, yref, xrob, yrob)
-    ang_rob = robot.read_compass()                                          # From Compass
-    ang_ref = get_ang_ref(xref, yref, xrob, yrob)                                                 # Calculated from coordinates
-    ang_off = ang_offset(ang_rob, ang_ref)                     # Offset in angle
-
-    # Angle offset logic
     off_cource_flag = True
     if math.fabs(ang_off) > THREASHOLD_ANG_MAX:
         off_cource_flag = True
-    if math.fabs(ang_off) < THREASHOLD_ANG_MIN:  # Check offset
+    if math.fabs(ang_off) < THREASHOLD_ANG_MIN:
         off_cource_flag = False
 
-    # Angle controller
-    if off_cource_flag:
-        posistion_controller.clear()                                        # Reset posistion controller
-        pos_ctrl_output = 0
-        angle_controller.setSetpoint(ang_ref)                               # Set setpoint for angle
-        ang_ctrl_output = angle_controller.update(ang_rob)                  # Update controller
-        print("DISTANCE: " + str(dist_rob) + "\tCOMPASS: " + str(ang_rob) + "\tANGLE OFFSET: " + str(
-            ang_off) + "\tPOSISTION_OUTPUT " + str(pos_ctrl_output) + "\t\t\tANGLE OUTPUT: " + str(ang_ctrl_output))
 
+
+def controlloop(xrob, yrob, xref, yref):
+    global off_corce_flag
+
+    # Get robot/ref distance and angle
+    dist_rob = get_dist_robot(xref, yref, xrob, yrob)
+    ang_rob = ang_robot()                                                                       # From Compass
+    ang_ref = get_ang_ref(xref, yref, xrob, yrob)                                               # Calculated from coordinates
+
+
+    # Angle offset logic
+    offset(ang_rob, ang_ref)                                                                    # set off_course_flag
+
+    # Control logic
+    if off_cource_flag:
+        posistion_controller.clear()                                                            # Reset posistion controller
+        pos_ctrl_output = 0
+        angle_controller.setSetpoint(ang_ref)                                                   # Set setpoint for angle
+        ang_ctrl_output = angle_controller.update(ang_rob)                                      # Update controller
+        ang_ctrl_output = ang_ctrl_output - (ang_ctrl_output % SCALE_FACTOR)
+        diagnostics(ang_ctrl_output, ang_rob, dist_rob, pos_ctrl_output, ang_ref)
         output = [pos_ctrl_output, ang_ctrl_output]
         return output
-        #robot.turn(SAMPLE_TIME, int(ang_ctrl_output))
 
 
     # Posistion controller
     else:
-        angle_controller.clear()                                             # Reset angle controller
+        angle_controller.clear()                                                                # Reset angle controller
         ang_ctrl_output = 0
         pos_ctrl_output = posistion_controller.update(dist_rob)
-        # TODO: Return ang_ctrl_output and pos_ctrl_otput
-        print("DISTANCE: " + str(dist_rob) + "\tCOMPASS: " + str(ang_rob) + "\tANGLE OFFSET: " + str(
-            ang_off) + "\tPOSISTION_OUTPUT " + str(pos_ctrl_output) + "\t\t\tANGLE OUTPUT: " + str(ang_ctrl_output))
-
+        pos_ctrl_output = pos_ctrl_output - (pos_ctrl_output % SCALE_FACTOR)
+        diagnostics(ang_ctrl_output, ang_rob, dist_rob, pos_ctrl_output, ang_ref)
         output = [pos_ctrl_output, ang_ctrl_output]
         return output
-        #robot.walk(SAMPLE_TIME, int(pos_ctrl_output))
-
-    # Check if waypoint is reached
-    if dist_rob < THREASHOLD_POS:                                           #check if robot has reached the waypoint
-        waypoint_flag = True
 
 
-    time.sleep(1)
+def update_motors():
+    global priv_forward
+    global priv_turn
+
+    output = controlloop(0.0, 0.0, 10.0, 0)
+
+    turn_speed = output[1]
+    walk_speed = output[0]
+
+    if turn_speed != priv_turn:
+        robot.walk_stop()                                                                       # Stop walking forward
+        robot.turn_start(turn_speed)                                                            # Start turning
+
+    if walk_speed != priv_forward:
+        robot.turn_stop()                                                                       # Stop turning
+    robot.walk_start(walk_speed)                                                                # Start walking forward
+
+    priv_turn = turn_speed
+    priv_forward = walk_speed
 
 
-# TEST
-L = [10.0, 0.0, 10.0, 10.0];
 while True:
-    output = controlloop(0.0,0.0,L)
-    robot.walk(SAMPLE_TIME, int(output[0]))
-    robot.turn(SAMPLE_TIME, int(output[1]))
+    update_motors()
+
+def diagnostics(ang_ctrl_output, ang_rob, dist_rob, pos_ctrl_output, ang_ref):
+    print(
+    "DISTANCE: " + str(dist_rob) + "\t-\tROBOT ANGLE: " + str(ang_rob) + "\tREFERANCE ANGLE: " + str(ang_ref) + "\tANGLE OFFSET: " + str(ang_rob-ang_ref) + "\t-\tPOSISTION_OUTPUT " + str(
+        pos_ctrl_output) + "\tANGLE OUTPUT: " + str(ang_ctrl_output))

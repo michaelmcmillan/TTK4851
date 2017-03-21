@@ -67,10 +67,10 @@ class PID:
             self.output = self.PTerm + (self.Ki * self.ITerm) + (self.Kd * self.DTerm)
 
             # Set restrictions on output
-            if self.output > 100:
-                self.output = 100
-            if self.output < -100:
-                self.output = -100
+            if self.output > 80:
+                self.output = 80
+            if self.output < -80:
+                self.output = -80
             if self.output > -50 and self.output < 50:
                 self.output = 0
 
