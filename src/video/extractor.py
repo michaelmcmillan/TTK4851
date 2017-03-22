@@ -25,6 +25,7 @@ class ImageStreamExtractor:
 
     def __init__(self, stream=None):
         self.images = []
+        self.latest_image = None
         self.worker = threading.Thread(target=self.extract_image)
         self.stream = stream \
             if stream else self.get_stream_from_camera()
@@ -74,21 +75,29 @@ class ImageStreamExtractor:
 
             for byte_number, byte in enumerate(chunk):
 
-                # Start: Magic byte that signalizes JPEG start
-                if  chunk[byte_number]   == '\xff' \
-                and chunk[byte_number+1] == '\xd8' \
-                and chunk[byte_number+2] == '\xff' \
-                and chunk[byte_number+3] == '\xdb':
-                    collecting_bytes = True 
+                try:
 
-                # Stop: EOF byte that signalizes JPEG stop
-                if  chunk[byte_number]   == '\xff' \
-                and chunk[byte_number+1] == '\xd9' \
-                and chunk[byte_number+2] == '\xff' \
-                and chunk[byte_number+3] == '\xd9' \
-                and chunk[byte_number+4] == '\x0d' \
-                and chunk[byte_number+5] == '\x0a':
+                    # Start: Magic byte that signalizes JPEG start
+                    if  chunk[byte_number]   == '\xff' \
+                    and chunk[byte_number+1] == '\xd8' \
+                    and chunk[byte_number+2] == '\xff' \
+                    and chunk[byte_number+3] == '\xdb':
+                        collecting_bytes = True 
+
+                    # Stop: EOF byte that signalizes JPEG stop
+                    if  chunk[byte_number]   == '\xff' \
+                    and chunk[byte_number+1] == '\xd9' \
+                    and chunk[byte_number+2] == '\xff' \
+                    and chunk[byte_number+3] == '\xd9' \
+                    and chunk[byte_number+4] == '\x0d' \
+                    and chunk[byte_number+5] == '\x0a':
+                        collecting_bytes = False
+
+                # Reset everything if error occured while parsing
+                except IndexError:
+                    image_data = ''
                     collecting_bytes = False
+                    break
 
                 # Add byte to image now that we are inbetween start and stop.
                 if collecting_bytes:
