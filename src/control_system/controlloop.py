@@ -20,7 +20,10 @@ posistion_controller = controller.PID(10, 5, 0)
 posistion_controller.setSampleTime(SAMPLE_TIME)
 posistion_controller.setSetpoint(0)
 
-angle_controller = controller.PID(1, 10, 0)
+# These constants are determined by looking at the robot
+# when the battery is fully charged
+#angle_controller = controller.PID(0.01, 5, 0)
+angle_controller = controller.PID(1, 5, 0.1)
 angle_controller.setSampleTime(SAMPLE_TIME)
 
 ang_ctrl_output = 0
@@ -54,10 +57,12 @@ def get_dist_robot(xpos_ref, ypos_ref, xpos_robot, ypos_robot):
         adj = xpos_ref - xpos_robot
         opp = ypos_ref - ypos_robot
         dist = math.sqrt(math.pow(adj, 2) + math.pow(opp, 2))
+
     # Testing with utrasonic as distance measurement
     dist_robot = robot.read_ultrasonic() - 10
 
-    return dist_robot
+    # Only use coordinates to determine if motor should be on/off
+    return dist #dist_robot
 
 
 # Correct the compass angle

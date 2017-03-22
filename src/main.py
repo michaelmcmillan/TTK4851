@@ -33,9 +33,12 @@ class Main:
     def from_a_star_to_controller(self):
         '''Fetches waypoints and robots position from A* and feeds that to
            the controller.'''
-        robot_position = (0, 0)
+        robot_position = (100, 200)
         waypoints = [(100, 200)]  
-        controlloop(robot_position, waypoints)
+
+        while True:
+            sleep(0.1)
+            controlloop(robot_position, waypoints)
 
         # Kalles saa ofte som mulig, men akkurat naa funker samlebaand.
         # a_output = liste med waypoints hvor id = 0 foerste waypointen
