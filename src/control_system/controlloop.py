@@ -177,7 +177,7 @@ def update_motors():
     priv_forward = walk_speed
 
 
-while True:
+while False:
     update_motors()
 
 def diagnostics(ang_ctrl_output, ang_rob, dist_rob, pos_ctrl_output, ang_ref):
