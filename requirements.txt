@@ -1,10 +1,24 @@
+# Lego NXT for taking to the robot
 nxt-python==2.2.2
+
+# Bindings for libusb
+# Also, make sure you brew install libusb on OSX.
 git+ssh://git@github.com/walac/pyusb.git
 
 # OSX must install this library and X-Code with gcc.
 pyobjc==3.2.1
 
 numpy==1.12.1
+
+# OpenCV binding
+opencv-python==3.2.0.6
+
+# Matplotlib
+# OSX: echo backend: TkAgg >> ~/.matplotlib/matplitlibrc 
+matplotlib==2.0.0
+
+# Scipy
+scipy==0.19.0
 
 #matplotlib
 #scipy
