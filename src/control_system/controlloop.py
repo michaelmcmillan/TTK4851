@@ -4,7 +4,6 @@ import robot
 
 # Create flags for decisions
 waypoint_flag = False
-THREASHOLD_POS = 2
 THREASHOLD_ANG_MAX = 10
 THREASHOLD_ANG_MIN = 5
 THREASHOLD_COORDINATES = 5
@@ -46,10 +45,10 @@ def get_ang_ref(xpos_ref, ypos_ref, xpos_robot, ypos_robot):
 # Get distance from robot to waypoint in 1D
 def get_dist_robot(xpos_ref, ypos_ref, xpos_robot, ypos_robot):
     # Find distance from robot to waypoint
-    if math.fabs(xpos_ref - xpos_robot) < THREASHOLD_COORDINATES:
+    if math.fabs(xpos_ref - xpos_robot) == 0:
         dist = math.fabs(ypos_ref - ypos_robot)
 
-    elif math.fabs(ypos_ref - ypos_robot) < THREASHOLD_COORDINATES:
+    elif math.fabs(ypos_ref - ypos_robot) == 0:
         dist = math.fabs(xpos_ref - xpos_robot)
     else:
         adj = xpos_ref - xpos_robot
@@ -116,11 +115,30 @@ def controlloop(xrob, yrob, xref, yref):
         output = [pos_ctrl_output, ang_ctrl_output]
         return output
 
+def update_waypoint(xrob, yrob, waypoints):
+    xref = waypoints[0]
+    yref = waypoints[1]
 
+    xdelta = math.fabs(xref- xrob)
+    ydelta = math.fabs(yref - yrob)
+
+    if xdelta < THREASHOLD_COORDINATES and ydelta < THREASHOLD_COORDINATES:
+        waypoints.pop(0)
+        waypoints.pop(0)
+    return waypoints
+
+
+# TODO: Use this code in main to control motors
 def update_motors():
     global priv_forward
     global priv_turn
 
+    # Get waypoint list and coordinates
+    waypoints = [0, 0, 10, 10]
+    xrob = 0
+    yrob = 0
+
+    update_waypoint(xrob, yrob, waypoints)
     output = controlloop(0.0, 0.0, 10.0, 0)
 
     turn_speed = output[1]
