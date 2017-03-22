@@ -15,6 +15,9 @@ priv_turn = 0
 priv_forward = 0
 
 
+ANGLE_CALIBRATION=165
+
+
 # Create Controllers
 posistion_controller = controller.PID(10, 5, 0)
 posistion_controller.setSampleTime(SAMPLE_TIME)
@@ -67,7 +70,7 @@ def get_dist_robot(xpos_ref, ypos_ref, xpos_robot, ypos_robot):
 
 # Correct the compass angle
 def ang_robot():
-    ang = robot.read_compass()
+    ang = robot.read_compass() - ANGLE_CALIBRATION
     if ang > 180:
         return ang-360
     else:

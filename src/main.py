@@ -1,7 +1,11 @@
 from video.extractor import ImageStreamExtractor
 from object_recognition.object_rec import *
 from control_system.controlloop import controlloop
+from path_finding.Domain import Map
+from path_finding.PathFinder import AStar
+import cv2
 from time import sleep
+
 
 class Main:
 
@@ -22,6 +26,10 @@ class Main:
         robot_position, track_matrix, all_positions, labeled_track_matrix \
             = object_rec_byte(image.data)
 
+        image.save()
+
+        cv2.imwrite('trackmatrix', track_matrix)
+
         return (robot_position, track_matrix)
 
     def from_object_recognition_to_a_star(self):
@@ -30,13 +38,24 @@ class Main:
         robot_position, track_matrix = self.from_camera_to_object_recognition()
         print(robot_position, track_matrix)
 
+        map_ = Map(track_matrix, robot_position, self.goal)
+        map_.printMap()
+        print("starting a*")
+        a_star = AStar(map_, 'BestFS')
+        waypoints = a_star.best_first_search()
+        print("stopping a*")
+        return (robot_position, waypoints)
+
     def from_a_star_to_controller(self):
         '''Fetches waypoints and robots position from A* and feeds that to
            the controller.'''
-        robot_position = (100, 200)
-        waypoints = [(100, 200)]  
+        #robot_position = (100, 200)
+        #waypoints = [(100, 200)]  
 
-        while True:
+        robot_position, waypoints = self.from_object_recognition_to_a_star()
+        waypoints.pop(0)
+
+        while False:
             sleep(0.1)
             controlloop(robot_position, waypoints)
 
