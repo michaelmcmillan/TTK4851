@@ -1,3 +1,4 @@
+from datetime import datetime
 import hashlib
 from base64 import b64encode
 from httplib import HTTPConnection
@@ -13,7 +14,8 @@ class Image:
     def name(self):
         return hashlib.sha224(self.data).hexdigest()[:6]
 
-    def save(self, name):
+    def save(self, name=None):
+        name = datetime.now()
         with open('/tmp/video/%s.jpg' % name, 'w') as f:
             f.write(self.data)
 
