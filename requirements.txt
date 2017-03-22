@@ -4,7 +4,8 @@ git+ssh://git@github.com/walac/pyusb.git
 # OSX must install this library and X-Code with gcc.
 pyobjc==3.2.1
 
-#numpy
+numpy==1.12.1
+
 #matplotlib
 #scipy
 #skimage
