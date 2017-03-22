@@ -5,6 +5,7 @@ from time import sleep
 class Main:
 
     def __init__(self):
+        self.goal = (200, 300)
         self.image_extractor = ImageStreamExtractor()
 
     def start(self):
@@ -23,25 +24,20 @@ class Main:
         return (robot_position, track_matrix)
 
     def from_object_recognition_to_a_star(self):
+        '''Fetches robots position and track matrix from object recognizer
+           and determines the shortest path from robots position to goal.'''
         robot_position, track_matrix = self.from_camera_to_object_recognition()
         print(robot_position, track_matrix)
+
+        # Kalles saa ofte som mulig, men akkurat naa funker samlebaand.
+        # a_output = liste med waypoints hvor id = 0 foerste waypointen
+        # (void) controlloop(robot_position, a_output)
         
-main = Main()
-main.start()
-sleep(0.5)
+if __name__ == '__main__':
+    main = Main()
+    main.start()
 
-main.from_object_recognition_to_a_star()
+    # Give the camera some time to heat up
+    sleep(0.5)
 
-while False:
-    sleep(1)
-    extractor.latest_image
-    sleep(1)
-
-    #im = extractor.extract_image()
-    #im = cv2.imdecode(np.asarray(bytearray(im.data)), -1)
-#
-    #plt.imshow(im)
-    #plt.ion()
-    #plt.show()
-    #plt.draw()
-    #plt.pause(0.001)
+    main.from_object_recognition_to_a_star()
