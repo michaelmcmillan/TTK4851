@@ -80,9 +80,19 @@ def offset(ang_rob, ang_ref):
         off_cource_flag = False
 
 
-
-def controlloop(xrob, yrob, xref, yref):
+def controlloop(robot_coordinate, ref):
     global off_corce_flag
+    global priv_forward
+    global priv_turn
+    global pos_ctrl_output
+    global ang_ctrl_output
+
+    # Extract coordinates
+    xrob = robot_coordinate[0]
+    yrob = robot_coordinate[1]
+
+    xref = ref[0][0]
+    yref = ref[0][1]
 
     # Get robot/ref distance and angle
     dist_rob = get_dist_robot(xref, yref, xrob, yrob)
@@ -101,8 +111,6 @@ def controlloop(xrob, yrob, xref, yref):
         ang_ctrl_output = angle_controller.update(ang_rob)                                      # Update controller
         ang_ctrl_output = ang_ctrl_output - (ang_ctrl_output % SCALE_FACTOR)
         diagnostics(ang_ctrl_output, ang_rob, dist_rob, pos_ctrl_output, ang_ref)
-        output = [pos_ctrl_output, ang_ctrl_output]
-        return output
 
 
     # Posistion controller
@@ -112,14 +120,27 @@ def controlloop(xrob, yrob, xref, yref):
         pos_ctrl_output = posistion_controller.update(dist_rob)
         pos_ctrl_output = pos_ctrl_output - (pos_ctrl_output % SCALE_FACTOR)
         diagnostics(ang_ctrl_output, ang_rob, dist_rob, pos_ctrl_output, ang_ref)
-        output = [pos_ctrl_output, ang_ctrl_output]
-        return output
+
+
+    # Start motors
+    if ang_ctrl_output != priv_turn:
+        robot.walk_stop()                                                                       # Stop walking forward
+        robot.turn_start(ang_ctrl_output)                                                       # Start turning
+
+    if pos_ctrl_output != priv_forward:
+        robot.turn_stop()                                                                       # Stop turning
+    robot.walk_start(pos_ctrl_output)                                                           # Start walking forward
+
+    # Remember output for next iteration
+    priv_turn = ang_ctrl_output
+    priv_forward = pos_ctrl_output
+
 
 def update_waypoint(xrob, yrob, waypoints):
     xref = waypoints[0]
     yref = waypoints[1]
 
-    xdelta = math.fabs(xref- xrob)
+    xdelta = math.fabs(xref - xrob)
     ydelta = math.fabs(yref - yrob)
 
     if xdelta < THREASHOLD_COORDINATES and ydelta < THREASHOLD_COORDINATES:
@@ -150,7 +171,7 @@ def update_motors():
 
     if walk_speed != priv_forward:
         robot.turn_stop()                                                                       # Stop turning
-    robot.walk_start(walk_speed)                                                                # Start walking forward
+        robot.walk_start(walk_speed)                                                                # Start walking forward
 
     priv_turn = turn_speed
     priv_forward = walk_speed
