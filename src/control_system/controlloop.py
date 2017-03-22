@@ -129,13 +129,14 @@ def controlloop(robot_coordinate, ref):
 
     if pos_ctrl_output != priv_forward:
         robot.turn_stop()                                                                       # Stop turning
-    robot.walk_start(pos_ctrl_output)                                                           # Start walking forward
+        robot.walk_start(pos_ctrl_output)                                                       # Start walking forward
 
     # Remember output for next iteration
     priv_turn = ang_ctrl_output
     priv_forward = pos_ctrl_output
 
 
+# old 
 def update_waypoint(xrob, yrob, waypoints):
     xref = waypoints[0]
     yref = waypoints[1]
