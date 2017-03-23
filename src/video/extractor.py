@@ -25,10 +25,11 @@ class Image:
 class ImageStreamExtractor:
     '''Asynchronously parses a stream of JPEGs.'''
 
-    def __init__(self, stream=None):
+    def __init__(self, stream=None, camera_ip=None):
         self.images = []
         self.latest_image = None
         self.worker = threading.Thread(target=self.extract_image)
+        self.camera_ip = camera_ip
         self.stream = stream \
             if stream else self.get_stream_from_camera()
         self.working = False
@@ -45,7 +46,7 @@ class ImageStreamExtractor:
 
     def get_stream_from_camera(self):
         '''Open a HTTP stream to the DLink webcam.'''
-        conn = HTTPConnection('192.168.0.100')
+        conn = HTTPConnection(self.camera_ip)
         # Username: admin. Password: <blank>
         authorization = {'Authorization': 'Basic YWRtaW46'}
         conn.request('GET', '/video/mjpg.cgi?profileid=3', headers=authorization)
