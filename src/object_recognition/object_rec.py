@@ -9,7 +9,14 @@ def read_image(filepath="test_mini2.png"):
     image = cv2.imread(filepath)
     return image
 def byte_to_image(image_data):
-    return cv2.imdecode(np.asarray(bytearray(image_data)), -1)
+    image = cv2.imdecode(np.asarray(bytearray(image_data)), -1)
+                        # 320 x 240
+    #print(image)
+    cropped_image = image[20:220, 20:300]
+    #cv2.imshow('OK', cropped_image)
+    #cv2.imwrite('cropped.jpg', cropped_image)
+    return cropped_image
+
 def fill_image(im):
     h, w = im.shape[:2]
     mask = np.zeros((h+2, w+2), np.uint8)
