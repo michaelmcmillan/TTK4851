@@ -45,11 +45,11 @@ class ObjectRecognition(Process):
 
                 recognized_track = (robot_position, track_matrix)
 
-                #plt.imshow(byte_to_image(recognized_track[1]))
-                #plt.ion()
-                #plt.show()
-                #plt.draw()
-                #plt.pause(0.001)
+                plt.imshow(recognized_track[1])
+                plt.ion()
+                plt.show()
+                plt.draw()
+                plt.pause(0.001)
 
             #self.output.put(recognized_track)
 
