@@ -1,24 +1,26 @@
 from multiprocessing import Process, Queue, Value, Array, Manager
 from threading import Thread
 from time import sleep
+from matplotlib import pyplot as plt
 
 # This code implements a shared LifoQueue.
 
-#from multiprocessing.managers import BaseManager
-#from Queue import LifoQueue
+from multiprocessing.managers import BaseManager
+from Queue import LifoQueue
 
-#class LifoManager(BaseManager):
-#    pass
+class LifoManager(BaseManager):
+    pass
 
-#LifoManager.register('LifoQueue', LifoQueue)
-#manager = LifoManager()
-#manager.start()
-#self.output = manager.LifoQueue()
+LifoManager.register('LifoQueue', LifoQueue)
+def create_lifo_queue():
+    manager = LifoManager()
+    manager.start()
+    return manager.LifoQueue()
 
 class Video(Process):
 
     def __init__(self):
-        self.output = Queue() 
+        self.output = create_lifo_queue()
         super(Video, self).__init__()
 
     def run(self):
@@ -51,6 +53,11 @@ class ObjectRecognition(Process):
             robot_position, track_matrix, all_positions, labeled_track_matrix \
                 = object_rec_byte(image)
             recognized_track = (robot_position, track_matrix)
+            plt.imshow(track_matrix, cmap="gray")
+            plt.ion()
+            plt.show()
+            plt.draw()
+            plt.pause(0.001)
             self.output.put(recognized_track)
             #print('Object recognition: Pushed matrix.')
 
@@ -97,7 +104,7 @@ class Controller(Process):
                 for x in range(0, len(waypoints), 2) \
                 if (waypoints[x], waypoints[x+1]) != (0,0)] 
 
-            controlloop((self.robot_x.value, self.robot_y.value), waypoints)
+#            controlloop((self.robot_x.value, self.robot_y.value), waypoints)
 
 video = Video()
 video.start()
