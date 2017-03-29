@@ -1,4 +1,4 @@
-from multiprocessing import Process, Queue, Value
+from multiprocessing import Process, Queue, Value, Array, Manager
 from threading import Thread
 from time import sleep
 
@@ -24,13 +24,14 @@ class Video(Process):
     def run(self):
         from video.extractor import ImageStreamExtractor
 
-        image_extractor = ImageStreamExtractor(camera_ip='192.168.0.102')
+        image_extractor = ImageStreamExtractor(camera_ip='192.168.0.101')
         image_extractor.start()
         previous_image = None
 
         while True:
             image = image_extractor.latest_image
             if image != previous_image:
+                #print('Image extracted from video stream.')
                 self.output.put(image.data)
                 previous_image = image
 
@@ -46,10 +47,12 @@ class ObjectRecognition(Process):
 
         while True:
             image = self.input.get()
+            #print('Object recognition: Received image.')
             robot_position, track_matrix, all_positions, labeled_track_matrix \
                 = object_rec_byte(image)
             recognized_track = (robot_position, track_matrix)
             self.output.put(recognized_track)
+            #print('Object recognition: Pushed matrix.')
 
 class AStar(Process):
 
@@ -65,23 +68,36 @@ class AStar(Process):
 
         while True:
             robot_position, track_matrix = self.input.get() 
+            print('A*: Received matrix.')
             map_ = Map(track_matrix, robot_position, self.goal)
             a_star = AStar(map_, 'BestFS')
             waypoints = a_star.best_first_search()
             self.output.put(waypoints) 
+            print('A*: Pushed waypoints.')
 
 class Controller(Process):
 
     def __init__(self):
         self.robot_x = Value('i', -1)
         self.robot_y = Value('i', -1)
-        self.waypoints = None
+        self.waypoints = Array('i', 1000)
         super(Controller, self).__init__()
 
     def run(self):
+        from control_system.controlloop import controlloop
+
         while True:
-            sleep(0.1)
-            print(self.robot_x, self.robot_y)
+            sleep(0.10)
+            if self.waypoints[:][0] == 0:
+                print("no waypoints")
+                continue
+
+            waypoints = self.waypoints[:]
+            waypoints = [(waypoints[x], waypoints[x+1]) \
+                for x in range(0, len(waypoints), 2) \
+                if (waypoints[x], waypoints[x+1]) != (0,0)] 
+
+            controlloop((self.robot_x.value, self.robot_y.value), waypoints)
 
 video = Video()
 video.start()
@@ -107,8 +123,7 @@ def first_loop():
 def second_loop():
     while True:
         waypoints = a_star.output.get()
-        print("got waypoints")
-        controller.waypoints = waypoints
+        controller.waypoints = Array('i', [i for coordinate in waypoints for i in coordinate])
 
 t1 = Thread(target=first_loop)
 t2 = Thread(target=second_loop)
@@ -116,9 +131,3 @@ t1.setDaemon(True)
 t2.setDaemon(True)
 t1.start()
 t2.start()
-
-#while True:
-
-    # Thread 1
-
-    # Thread 2
