@@ -1,11 +1,29 @@
+# Lego NXT for taking to the robot
 nxt-python==2.2.2
+
+# Bindings for libusb
+# Also, make sure you brew install libusb on OSX.
 git+ssh://git@github.com/walac/pyusb.git
 
 # OSX must install this library and X-Code with gcc.
 #pyobjc==3.2.1
 
-#numpy
-#matplotlib
-#scipy
-#skimage
-#git+ssh://git@github.com/0-1-0/lightblue-0.4.git
+numpy==1.12.1
+
+# OpenCV binding
+opencv-python==3.2.0.6
+
+# Matplotlib
+# OSX: echo backend: TkAgg >> ~/.matplotlib/matplitlibrc 
+matplotlib==2.0.0
+
+# Scipy
+scipy==0.19.0
+scikit-image==0.12.3
+
+# Lightblue of OS X
+# This is a fork of pybluez that work on the latest OS X versions.
+# You also need to install LightAquaBlue with XCode. You can find all the required filed in
+# the osx dir in pybluez. Run the following command (using sudo) to install it.
+# sudo xcodebuild install -arch 'x86_64' -target LightAquaBlue -configuration Release DSTROOT=/ INSTALL_PATH=/Library/Frameworks DEPLOYMENT_LOCATION=YES
+git+ssh://git@github.com/b4be1/pybluez.git

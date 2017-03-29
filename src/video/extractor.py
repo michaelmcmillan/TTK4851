@@ -1,3 +1,4 @@
+from datetime import datetime
 import hashlib
 from base64 import b64encode
 from httplib import HTTPConnection
@@ -13,7 +14,8 @@ class Image:
     def name(self):
         return hashlib.sha224(self.data).hexdigest()[:6]
 
-    def save(self, name):
+    def save(self, name=None):
+        name = datetime.now()
         with open('/tmp/video/%s.jpg' % name, 'w') as f:
             f.write(self.data)
 
@@ -23,9 +25,11 @@ class Image:
 class ImageStreamExtractor:
     '''Asynchronously parses a stream of JPEGs.'''
 
-    def __init__(self, stream=None):
+    def __init__(self, stream=None, camera_ip=None):
         self.images = []
+        self.latest_image = None
         self.worker = threading.Thread(target=self.extract_image)
+        self.camera_ip = camera_ip
         self.stream = stream \
             if stream else self.get_stream_from_camera()
         self.working = False
@@ -42,7 +46,7 @@ class ImageStreamExtractor:
 
     def get_stream_from_camera(self):
         '''Open a HTTP stream to the DLink webcam.'''
-        conn = HTTPConnection('192.168.0.100')
+        conn = HTTPConnection(self.camera_ip)
         # Username: admin. Password: <blank>
         authorization = {'Authorization': 'Basic YWRtaW46'}
         conn.request('GET', '/video/mjpg.cgi?profileid=3', headers=authorization)
@@ -74,21 +78,29 @@ class ImageStreamExtractor:
 
             for byte_number, byte in enumerate(chunk):
 
-                # Start: Magic byte that signalizes JPEG start
-                if  chunk[byte_number]   == '\xff' \
-                and chunk[byte_number+1] == '\xd8' \
-                and chunk[byte_number+2] == '\xff' \
-                and chunk[byte_number+3] == '\xdb':
-                    collecting_bytes = True 
+                try:
 
-                # Stop: EOF byte that signalizes JPEG stop
-                if  chunk[byte_number]   == '\xff' \
-                and chunk[byte_number+1] == '\xd9' \
-                and chunk[byte_number+2] == '\xff' \
-                and chunk[byte_number+3] == '\xd9' \
-                and chunk[byte_number+4] == '\x0d' \
-                and chunk[byte_number+5] == '\x0a':
+                    # Start: Magic byte that signalizes JPEG start
+                    if  chunk[byte_number]   == '\xff' \
+                    and chunk[byte_number+1] == '\xd8' \
+                    and chunk[byte_number+2] == '\xff' \
+                    and chunk[byte_number+3] == '\xdb':
+                        collecting_bytes = True 
+
+                    # Stop: EOF byte that signalizes JPEG stop
+                    if  chunk[byte_number]   == '\xff' \
+                    and chunk[byte_number+1] == '\xd9' \
+                    and chunk[byte_number+2] == '\xff' \
+                    and chunk[byte_number+3] == '\xd9' \
+                    and chunk[byte_number+4] == '\x0d' \
+                    and chunk[byte_number+5] == '\x0a':
+                        collecting_bytes = False
+
+                # Reset everything if error occured while parsing
+                except IndexError:
+                    image_data = ''
                     collecting_bytes = False
+                    break
 
                 # Add byte to image now that we are inbetween start and stop.
                 if collecting_bytes:

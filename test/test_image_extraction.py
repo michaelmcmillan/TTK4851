@@ -56,7 +56,7 @@ class TestImageExtraction(TestCase):
         self.assertNotEqual(latest_image_now, latest_image_then)
 
     def test_it_finds_2_jpegs_in_the_http_stream(self):
-        extractor = ImageStreamExtractor()
+        extractor = ImageStreamExtractor(camera_ip='192.168.1.69')
 
         # Wait for images to be extracted
         extractor.start()

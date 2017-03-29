@@ -1,3 +1,4 @@
+from os import path
 import numpy as np
 import cv2
 from matplotlib import pyplot as plt
@@ -8,7 +9,14 @@ def read_image(filepath="test_mini2.png"):
     image = cv2.imread(filepath)
     return image
 def byte_to_image(image_data):
-    return cv2.imdecode(np.asarray(bytearray(image_data)), -1)
+    image = cv2.imdecode(np.asarray(bytearray(image_data)), -1)
+                        # 320 x 240
+    #print(image)
+    cropped_image = image[20:220, 20:300]
+    #cv2.imshow('OK', cropped_image)
+    #cv2.imwrite('cropped.jpg', cropped_image)
+    return cropped_image
+
 def fill_image(im):
     h, w = im.shape[:2]
     mask = np.zeros((h+2, w+2), np.uint8)
@@ -65,7 +73,7 @@ def find_robot(image, template):
     return coords
 """ Call this function for segmenting an image from a list of bytes  """
 def object_rec_byte(byte_image):
-    image = byte_to_image(byte_im)
+    image = byte_to_image(byte_image)
     return object_rec_main(image)
 """ Call this function for segmenting an image from file """
 def object_rec_file(file_name = "test_mini2.png"):
@@ -79,7 +87,9 @@ def object_rec_main(image):
         robot_pos = centers[labeled_image[robot_pos]-1]
     return robot_pos, cimage, centers, labeled_image
 
-template = read_image("mini_template.png")
+dir_of_template = path.dirname(__file__)
+template = read_image(path.join(dir_of_template, "mini_template.png"))
+
 if __name__=="__main__":
     robot_pos, cimage, centers, labeled_image = object_rec_file()
     stop = time()
