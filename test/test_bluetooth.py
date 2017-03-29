@@ -1,7 +1,7 @@
 from unittest import TestCase, skip
-import bluetooth
+#import bluetooth
 
-class TestLightBlue(TestCase):
+class TestLightBlue:
 
     def test_light_blue(self):
 

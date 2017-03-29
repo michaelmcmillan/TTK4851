@@ -3,6 +3,8 @@ from object_recognition.object_rec import *
 from control_system.controlloop import controlloop
 from path_finding.Domain import Map
 from path_finding.PathFinder import AStar
+from skimage import img_as_ubyte
+
 import cv2
 from time import sleep
 
@@ -10,7 +12,9 @@ from time import sleep
 class Main:
 
     def __init__(self):
-        self.goal = (200, 300)
+        self.goal = (40, 22)
+        self.robot_position = (None, None)
+        self.waypoints = []
         self.image_extractor = ImageStreamExtractor()
 
     def start(self):
@@ -26,9 +30,8 @@ class Main:
         robot_position, track_matrix, all_positions, labeled_track_matrix \
             = object_rec_byte(image.data)
 
-        image.save()
-
-        cv2.imwrite('trackmatrix', track_matrix)
+        #cv2_compatible_track = img_as_ubyte(track_matrix)
+        #cv2.imwrite('trackmatrix_fixed2.jpg', cv2_compatible_track))
 
         return (robot_position, track_matrix)
 
@@ -36,14 +39,14 @@ class Main:
         '''Fetches robots position and track matrix from object recognizer
            and determines the shortest path from robots position to goal.'''
         robot_position, track_matrix = self.from_camera_to_object_recognition()
-        print(robot_position, track_matrix)
 
         map_ = Map(track_matrix, robot_position, self.goal)
-        map_.printMap()
+
         print("starting a*")
         a_star = AStar(map_, 'BestFS')
         waypoints = a_star.best_first_search()
         print("stopping a*")
+
         return (robot_position, waypoints)
 
     def from_a_star_to_controller(self):
@@ -52,10 +55,13 @@ class Main:
         #robot_position = (100, 200)
         #waypoints = [(100, 200)]  
 
+
         robot_position, waypoints = self.from_object_recognition_to_a_star()
+
+        # First waypoint is the robots location, which we dont care about
         waypoints.pop(0)
 
-        while False:
+        while True:
             sleep(0.1)
             controlloop(robot_position, waypoints)
 
@@ -70,5 +76,5 @@ if __name__ == '__main__':
     # Give the camera some time to heat up
     sleep(0.5)
 
-    #main.from_object_recognition_to_a_star()
+    #main.from_camera_to_object_recognition()
     main.from_a_star_to_controller()
