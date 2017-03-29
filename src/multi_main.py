@@ -20,21 +20,26 @@ def create_lifo_queue():
 class Video(Process):
 
     def __init__(self):
-        self.output = create_lifo_queue()
+        self.output = Queue()#create_lifo_queue()
         super(Video, self).__init__()
 
     def run(self):
         from video.extractor import ImageStreamExtractor
+        
 
         image_extractor = ImageStreamExtractor(camera_ip='192.168.0.101')
         image_extractor.start()
         previous_image = None
-
         while True:
             image = image_extractor.latest_image
             if image != previous_image:
                 #print('Image extracted from video stream.')
                 self.output.put(image.data)
+                if self.output.qsize() < 2:
+                    pass
+                else:
+                    self.output.get()
+
                 previous_image = image
 
 class ObjectRecognition(Process):
@@ -45,7 +50,7 @@ class ObjectRecognition(Process):
         super(ObjectRecognition, self).__init__()
 
     def run(self):
-        from object_recognition.object_rec import object_rec_byte
+        from object_recognition.object_rec import object_rec_byte, byte_to_image
 
         while True:
             image = self.input.get()
@@ -53,11 +58,7 @@ class ObjectRecognition(Process):
             robot_position, track_matrix, all_positions, labeled_track_matrix \
                 = object_rec_byte(image)
             recognized_track = (robot_position, track_matrix)
-            plt.imshow(track_matrix, cmap="gray")
-            plt.ion()
-            plt.show()
-            plt.draw()
-            plt.pause(0.001)
+            #plt.imshow(track_matrix, cmap="gray")
             self.output.put(recognized_track)
             #print('Object recognition: Pushed matrix.')
 
@@ -119,13 +120,19 @@ controller = Controller()
 controller.start()
 
 def first_loop():
+    from object_recognition.object_rec import byte_to_image
     while True:
         image = video.output.get()
-        recognition.input.put(image)
-        recognized_track = recognition.output.get()
-        controller.robot_x = Value('i', recognized_track[0][0])
-        controller.robot_y = Value('i', recognized_track[0][1])
-        a_star.input.put(recognized_track)
+#        recognition.input.put(image)
+        plt.imshow(byte_to_image(image))
+        plt.ion()
+        plt.show()
+        plt.draw()
+        plt.pause(0.001)
+#        recognized_track = recognition.output.get()
+#        controller.robot_x = Value('i', recognized_track[0][0])
+#        controller.robot_y = Value('i', recognized_track[0][1])
+#        a_star.input.put(recognized_track)
 
 def second_loop():
     while True:

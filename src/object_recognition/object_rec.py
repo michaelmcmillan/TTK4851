@@ -12,7 +12,7 @@ def byte_to_image(image_data):
     image = cv2.imdecode(np.asarray(bytearray(image_data)), -1)
                         # 320 x 240
     #print(image)
-    cropped_image = image[50:200, 50:280]
+    cropped_image = image[20:220, 20:300]
     #cv2.imshow('OK', cropped_image)
     #cv2.imwrite('cropped.jpg', cropped_image)
     return cropped_image
