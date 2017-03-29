@@ -94,7 +94,7 @@ class AStar:
 				x = x.parent
 			dir = tmp_dir
 		waypoints.append((x.x,x.y))
-		print waypoints[::-1]
+		#print waypoints[::-1]
 		return waypoints[::-1]
 
 	def direction(self, p1, p2):
