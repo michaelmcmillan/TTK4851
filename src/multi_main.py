@@ -1,4 +1,4 @@
-from multiprocessing import Process, Queue, Value, Array, Manager
+from multiprocessing import Process, Queue, Value, Array, Manager, Pipe
 from threading import Thread
 from time import sleep
 from matplotlib import pyplot as plt
@@ -22,28 +22,34 @@ class Video(Process):
 
 class ObjectRecognition(Process):
     
-    def __init__(self):
+    def __init__(self, pipe):
         #self.input = Queue()
-        #self.output = Queue()
+        self.output = Queue()
         super(ObjectRecognition, self).__init__()
+        self.pipe = pipe
 
     def run(self):
-        from object_recognition.object_rec import object_rec_byte, byte_to_image
+        from object_recognition.object_rec import object_rec_byte, byte_to_image, read_image, object_rec_file
         from video.extractor import ImageStreamExtractor
         
         image_extractor = ImageStreamExtractor(camera_ip='192.168.0.101')
         image_extractor.start()
 
+        previous_image = None
         while True:
             image = image_extractor.latest_image
-            previous_image = None
+            #image = "object_recognition/test_mini2.png"
             if image != previous_image:
                 previous_image = image.data
 
                 robot_position, track_matrix, all_positions, labeled_track_matrix \
                     = object_rec_byte(image.data)
-
+                #robot_position, track_matrix, all_positions, labeled_track_matrix \
+#                    = object_rec_file(image)
                 recognized_track = (robot_position, track_matrix)
+                print robot_position
+
+                self.pipe.send((robot_position, track_matrix))
 
                 plt.imshow(recognized_track[1])
                 plt.ion()
@@ -51,15 +57,15 @@ class ObjectRecognition(Process):
                 plt.draw()
                 plt.pause(0.001)
 
-            #self.output.put(recognized_track)
+                self.output.put(recognized_track)
 
 
 class AStar(Process):
 
-    def __init__(self, goal):
-        self.input = Queue()
+    def __init__(self, goal, pipe):
         self.output = Queue()
         self.goal = goal
+        self.pipe = pipe
         super(AStar, self).__init__()
 
     def run(self):
@@ -67,7 +73,7 @@ class AStar(Process):
         from path_finding.PathFinder import AStar
 
         while True:
-            robot_position, track_matrix = self.input.get() 
+            robot_position, track_matrix = self.pipe.recv() 
             print('A*: Received matrix.')
             map_ = Map(track_matrix, robot_position, self.goal)
             a_star = AStar(map_, 'BestFS')
@@ -96,26 +102,28 @@ class Controller(Process):
             waypoints = [(waypoints[x], waypoints[x+1]) \
                 for x in range(0, len(waypoints), 2) \
                 if (waypoints[x], waypoints[x+1]) != (0,0)] 
-
-#            controlloop((self.robot_x.value, self.robot_y.value), waypoints)
+    
+            controlloop((self.robot_x.value, self.robot_y.value), waypoints)
 
 #video = Video()
 #video.start()
 
-recognition = ObjectRecognition()
+parent_pipe, child_pipe = Pipe()
+
+recognition = ObjectRecognition(child_pipe)
 recognition.start()
 
-#a_star = AStar(goal=(100, 200))
-#a_star.start()
+a_star = AStar(goal=(100, 200), pipe=parent_pipe)#
+a_star.start()
 
-#controller = Controller()
-#controller.start()
+controller = Controller()
+controller.start()
 
-#def first_loop():
-    #from object_recognition.object_rec import byte_to_image
+def first_loop():
+    from object_recognition.object_rec import byte_to_image
 
-    #while True:
-    #    print('hello', video.output.value)
+    while True:
+        #print('hello', video.output.value)
 
         #image = video.output.value
 #        recognition.input.put(image)
@@ -124,19 +132,19 @@ recognition.start()
         #plt.show()
         #plt.draw()
         #plt.pause(0.001)
-#        recognized_track = recognition.output.get()
-#        controller.robot_x = Value('i', recognized_track[0][0])
-#        controller.robot_y = Value('i', recognized_track[0][1])
+        recognized_track = recognition.output.get()
+        controller.robot_x = Value('i', recognized_track[0][0])
+        controller.robot_y = Value('i', recognized_track[0][1])
 #        a_star.input.put(recognized_track)
 
-#def second_loop():
-#    while True:
-#        waypoints = a_star.output.get()
-#        controller.waypoints = Array('i', [i for coordinate in waypoints for i in coordinate])
+def second_loop():
+    while True:
+        waypoints = a_star.output.get()
+        controller.waypoints = Array('i', [i for coordinate in waypoints for i in coordinate])
 
-#t1 = Thread(target=first_loop)
-#t2 = Thread(target=second_loop)
-#t1.setDaemon(True)
-#t2.setDaemon(True)
-#t1.start()
-#t2.start()
+t1 = Thread(target=first_loop)
+t2 = Thread(target=second_loop)
+t1.setDaemon(True)
+t2.setDaemon(True)
+t1.start()
+t2.start()

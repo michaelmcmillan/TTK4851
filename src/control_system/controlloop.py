@@ -4,7 +4,7 @@ import robot
 
 # Create flags for decisions
 waypoint_flag = False
-THREASHOLD_ANG_MAX = 10
+THREASHOLD_ANG_MAX = 10 #10
 THREASHOLD_ANG_MIN = 5
 THREASHOLD_COORDINATES = 5
 SAMPLE_TIME = 0.1
@@ -19,14 +19,14 @@ ANGLE_CALIBRATION=165
 
 
 # Create Controllers
-posistion_controller = controller.PID(10, 5, 0)
+posistion_controller = controller.PID(5, 5, 0)
 posistion_controller.setSampleTime(SAMPLE_TIME)
 posistion_controller.setSetpoint(0)
 
 # These constants are determined by looking at the robot
 # when the battery is fully charged
 #angle_controller = controller.PID(0.01, 5, 0)
-angle_controller = controller.PID(1, 5, 0.1)
+angle_controller = controller.PID(0.5, 0, 1)
 angle_controller.setSampleTime(SAMPLE_TIME)
 
 ang_ctrl_output = 0
@@ -84,8 +84,10 @@ def offset(ang_rob, ang_ref):
     off_cource_flag = True
     if math.fabs(ang_off) > THREASHOLD_ANG_MAX:
         off_cource_flag = True
-    if math.fabs(ang_off) < THREASHOLD_ANG_MIN:
-        off_cource_flag = False
+    else:
+	off_cource_flag = False
+    #if math.fabs(ang_off) < THREASHOLD_ANG_MIN:
+    #    off_cource_flag = False
 
 
 def controlloop(robot_coordinate, ref):
