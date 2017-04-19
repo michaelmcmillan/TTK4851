@@ -15,7 +15,7 @@ priv_turn = 0
 priv_forward = 0
 
 
-ANGLE_CALIBRATION=165
+ANGLE_CALIBRATION= -30
 
 
 # Create Controllers

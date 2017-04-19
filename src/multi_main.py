@@ -1,7 +1,7 @@
 from multiprocessing import Process, Queue, Value, Array, Manager, Pipe
 from threading import Thread
 from time import sleep
-from matplotlib import pyplot as plt
+#from matplotlib import pyplot as plt
 
 from multiprocessing.managers import BaseManager
 
@@ -51,11 +51,11 @@ class ObjectRecognition(Process):
 
                 self.pipe.send((robot_position, track_matrix))
 
-                plt.imshow(recognized_track[1])
-                plt.ion()
-                plt.show()
-                plt.draw()
-                plt.pause(0.001)
+                #plt.imshow(recognized_track[1])
+                #plt.ion()
+                #plt.show()
+                #plt.draw()
+                #plt.pause(0.001)
 
                 self.output.put(recognized_track)
 
@@ -95,7 +95,7 @@ class Controller(Process):
         while True:
             sleep(0.10)
             if self.waypoints[:][0] == 0:
-                print("no waypoints")
+                #print("no waypoints")
                 continue
 
             waypoints = self.waypoints[:]
@@ -113,7 +113,7 @@ parent_pipe, child_pipe = Pipe()
 recognition = ObjectRecognition(child_pipe)
 recognition.start()
 
-a_star = AStar(goal=(100, 200), pipe=parent_pipe)#
+a_star = AStar(goal=(235, 125), pipe=parent_pipe)#
 a_star.start()
 
 controller = Controller()
