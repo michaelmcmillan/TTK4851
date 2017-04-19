@@ -10,6 +10,12 @@ class Map:
     map = None
 
     def __init__(self, pixels, start, goal):
+        radius_y = 20
+        radius_x = 15
+        pixels[start[0]:start[0] + radius_y, start[1]] = 0
+        pixels[start[0] - radius_y: start[0], start[1]] = 0
+        pixels[start[0], start[1]:start[1] + radius_x] = 0
+        pixels[start[0], start[1] - radius_x:start[1]] = 0
         self.start = start
         self.goal = goal
         self.gridHeight = pixels.shape[1]
