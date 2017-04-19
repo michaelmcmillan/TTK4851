@@ -32,7 +32,7 @@ class ObjectRecognition(Process):
         from object_recognition.object_rec import object_rec_byte, byte_to_image, read_image, object_rec_file
         from video.extractor import ImageStreamExtractor
         
-        image_extractor = ImageStreamExtractor(camera_ip='192.168.0.101')
+        image_extractor = ImageStreamExtractor(camera_ip='192.168.0.100')
         image_extractor.start()
 
         previous_image = None
