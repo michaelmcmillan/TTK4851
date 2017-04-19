@@ -95,8 +95,12 @@ class Controller(Process):
         while True:
             sleep(0.10)
             if self.waypoints[:][0] == 0:
-                #print("no waypoints")
+                print(self.waypoints[:])
+                print("no waypoints")
                 continue
+            else:
+                print("got waypoints")
+                print(self.waypoints)
 
             waypoints = self.waypoints[:]
             waypoints = [(waypoints[x], waypoints[x+1]) \
