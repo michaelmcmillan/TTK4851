@@ -22,11 +22,12 @@ class Video(Process):
 
 class ObjectRecognition(Process):
     
-    def __init__(self, pipe):
+    def __init__(self, pipe, pid_pipe):
         #self.input = Queue()
-        self.output = Queue()
+        #self.output = Queue()
         super(ObjectRecognition, self).__init__()
         self.pipe = pipe
+        self.pid_pipe = pid_pipe
 
     def run(self):
         from object_recognition.object_rec import object_rec_byte, byte_to_image, read_image, object_rec_file
@@ -51,19 +52,19 @@ class ObjectRecognition(Process):
 
                 self.pipe.send((robot_position, track_matrix))
 
-                plt.imshow(recognized_track[1])
-                plt.ion()
-                plt.show()
-                plt.draw()
-                plt.pause(0.001)
+                #plt.imshow(recognized_track[1])
+                #plt.ion()
+                #plt.show()
+                #plt.draw()
+                #plt.pause(0.001)
 
-                self.output.put(recognized_track)
+                self.pid_pipe.send(robot_position)
 
 
 class AStar(Process):
 
-    def __init__(self, goal, pipe):
-        self.output = Queue()
+    def __init__(self, goal, pipe, pid_pipe):
+        #self.output = Queue()
         self.goal = goal
         self.pipe = pipe
         super(AStar, self).__init__()
@@ -78,7 +79,7 @@ class AStar(Process):
             map_ = Map(track_matrix, robot_position, self.goal)
             a_star = AStar(map_, 'BestFS')
             waypoints = a_star.best_first_search()
-            self.output.put(waypoints) 
+            self.pid_pipe.send(waypoints)
             print('A*: Pushed waypoints.')
 
 class Controller(Process):
@@ -109,11 +110,13 @@ class Controller(Process):
 #video.start()
 
 parent_pipe, child_pipe = Pipe()
+pid_parent_pos, pid_child_pos = Pipe()
+pid_parent_way, pid_child_way = Pipe()
 
-recognition = ObjectRecognition(child_pipe)
+recognition = ObjectRecognition(child_pipe, pid_child_pos)
 recognition.start()
 
-a_star = AStar(goal=(100, 200), pipe=parent_pipe)#
+a_star = AStar(goal=(100, 200), pipe=parent_pipe, pid_pipe=pid_child_way)#
 a_star.start()
 
 controller = Controller()
@@ -132,14 +135,14 @@ def first_loop():
         #plt.show()
         #plt.draw()
         #plt.pause(0.001)
-        recognized_track = recognition.output.get()
-        controller.robot_x = Value('i', recognized_track[0][0])
-        controller.robot_y = Value('i', recognized_track[0][1])
+        controller.robot_x, controller.robot_y = pid_parent_pos.recv() #Value('i', recognized_track[0][0])
+        #controller.robot_y = Value('i', recognized_track[0][1])
 #        a_star.input.put(recognized_track)
 
 def second_loop():
     while True:
-        waypoints = a_star.output.get()
+        #waypoints = a_star.output.get()
+        waypoints = pid_parent_way.recv()
         controller.waypoints = Array('i', [i for coordinate in waypoints for i in coordinate])
 
 t1 = Thread(target=first_loop)
