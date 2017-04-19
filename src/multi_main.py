@@ -33,7 +33,7 @@ class ObjectRecognition(Process):
         from object_recognition.object_rec import object_rec_byte, byte_to_image, read_image, object_rec_file
         from video.extractor import ImageStreamExtractor
         
-        image_extractor = ImageStreamExtractor(camera_ip='192.168.0.101')
+        image_extractor = ImageStreamExtractor(camera_ip='192.168.0.100')
         image_extractor.start()
 
         previous_image = None
@@ -96,8 +96,12 @@ class Controller(Process):
         while True:
             sleep(0.10)
             if self.waypoints[:][0] == 0:
+                print(self.waypoints[:])
                 print("no waypoints")
                 continue
+            else:
+                print("got waypoints")
+                print(self.waypoints)
 
             waypoints = self.waypoints[:]
             waypoints = [(waypoints[x], waypoints[x+1]) \
@@ -116,7 +120,7 @@ pid_parent_way, pid_child_way = Pipe()
 recognition = ObjectRecognition(child_pipe, pid_child_pos)
 recognition.start()
 
-a_star = AStar(goal=(100, 200), pipe=parent_pipe, pid_pipe=pid_child_way)#
+a_star = AStar(goal=(235, 125), pipe=parent_pipe, pid_pipe=pid_child_way)#
 a_star.start()
 
 controller = Controller()

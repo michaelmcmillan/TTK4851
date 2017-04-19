@@ -26,7 +26,7 @@ PIP=$(ENV_DIR)/bin/pip
 PYTHON=$(ENV_DIR)/bin/python
 
 start:
-	@$(PYTHON) src/main.py
+	@$(PYTHON) src/multi_main.py
 
 test:
 	@$(PYTHON) $(UNITTEST_FLAGS) $(TEST_DIR)
