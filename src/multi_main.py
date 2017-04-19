@@ -67,6 +67,7 @@ class AStar(Process):
         #self.output = Queue()
         self.goal = goal
         self.pipe = pipe
+        self.pid_pipe = pid_pipe
         super(AStar, self).__init__()
 
     def run(self):
@@ -79,6 +80,7 @@ class AStar(Process):
             map_ = Map(track_matrix, robot_position, self.goal)
             a_star = AStar(map_, 'BestFS')
             waypoints = a_star.best_first_search()
+            print('A*', waypoints)
             self.pid_pipe.send(waypoints)
             print('A*: Pushed waypoints.')
 
@@ -96,8 +98,8 @@ class Controller(Process):
         while True:
             sleep(0.10)
             if self.waypoints[:][0] == 0:
-                print(self.waypoints[:])
-                print("no waypoints")
+                #print(self.waypoints[:])
+                #print("no waypoints")
                 continue
             else:
                 print("got waypoints")
@@ -120,7 +122,7 @@ pid_parent_way, pid_child_way = Pipe()
 recognition = ObjectRecognition(child_pipe, pid_child_pos)
 recognition.start()
 
-a_star = AStar(goal=(235, 125), pipe=parent_pipe, pid_pipe=pid_child_way)#
+a_star = AStar(goal=(130, 110), pipe=parent_pipe, pid_pipe=pid_child_way)#
 a_star.start()
 
 controller = Controller()
@@ -139,7 +141,7 @@ def first_loop():
         #plt.show()
         #plt.draw()
         #plt.pause(0.001)
-        controller.robot_x, controller.robot_y = pid_parent_pos.recv() #Value('i', recognized_track[0][0])
+        controller.robot_y, controller.robot_x = pid_parent_pos.recv() #Value('i', recognized_track[0][0])
         #controller.robot_y = Value('i', recognized_track[0][1])
 #        a_star.input.put(recognized_track)
 
