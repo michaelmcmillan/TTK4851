@@ -120,7 +120,7 @@ def controlloop(robot_coordinate, ref):
         angle_controller.setSetpoint(ang_ref)                                                   # Set setpoint for angle
         ang_ctrl_output = angle_controller.update(ang_rob)                                      # Update controller
         ang_ctrl_output = ang_ctrl_output - (ang_ctrl_output % SCALE_FACTOR)
-        diagnostics(ang_ctrl_output, ang_rob, dist_rob, pos_ctrl_output, ang_ref)
+        diagnostics(ang_ctrl_output, ang_rob, dist_rob, pos_ctrl_output, ang_ref, xrob, yrob, xref, yref)
 
 
     # Posistion controller
@@ -129,7 +129,7 @@ def controlloop(robot_coordinate, ref):
         ang_ctrl_output = 0
         pos_ctrl_output = posistion_controller.update(dist_rob)
         pos_ctrl_output = pos_ctrl_output - (pos_ctrl_output % SCALE_FACTOR)
-        diagnostics(ang_ctrl_output, ang_rob, dist_rob, pos_ctrl_output, ang_ref)
+        diagnostics(ang_ctrl_output, ang_rob, dist_rob, pos_ctrl_output, ang_ref, xrob, yrob, xref, yref)
 
 
     # Start motors
@@ -191,7 +191,7 @@ def update_motors():
 while False:
     update_motors()
 
-def diagnostics(ang_ctrl_output, ang_rob, dist_rob, pos_ctrl_output, ang_ref):
+def diagnostics(ang_ctrl_output, ang_rob, dist_rob, pos_ctrl_output, ang_ref,xrob, yrob, xref, yref):
     print(
-    "DISTANCE: " + str(dist_rob) + "\t-\tROBOT ANGLE: " + str(ang_rob) + "\tREFERANCE ANGLE: " + str(ang_ref) + "\tANGLE OFFSET: " + str(ang_rob-ang_ref) + "\t-\tPOSISTION_OUTPUT " + str(
+    "ROBOT POS: [" + xrob + ", " + yrob + "]\t" + "REF POS: [" + xref + ", " + yref + "]\t" +"DISTANCE: " + str(dist_rob) + "\t-\tROBOT ANGLE: " + str(ang_rob) + "\tREFERANCE ANGLE: " + str(ang_ref) + "\tANGLE OFFSET: " + str(ang_rob-ang_ref) + "\t-\tPOSISTION_OUTPUT " + str(
         pos_ctrl_output) + "\tANGLE OUTPUT: " + str(ang_ctrl_output))
