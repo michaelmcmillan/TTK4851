@@ -1,9 +1,7 @@
-
 class AStar:
-	"""docstring for GenericAStar"""
-	created_dict = None  # Dictionary containing all nodes created
-	open_list = []  # Nodes in the queue not yet visited
-	closed_list = []  # Visted nodes
+	created_dict = None  			# Dictionary containing all nodes created
+	open_list = []  				# Nodes in the queue not yet visited
+	closed_list = []  				# Visted nodes
 	n0 = None
 	start = None
 	search_type = None
@@ -28,7 +26,7 @@ class AStar:
 
 		# Agenda Loop
 		# while no solution
-		while (self.open_list):  # Agenda
+		while (self.open_list):
 			x = self.search_queue_pop(self.search_type, self.open_list)
 			self.closed_list.append(x)
 			if x.is_goal(self.map):
@@ -61,13 +59,13 @@ class AStar:
 		else:  # If not recognized search mode
 			raise NotImplementedError
 
-	def attach_and_eval(self, c, p, map):  # Sert parent, g, h and f values of a new node
+	def attach_and_eval(self, c, p, map):  # Sett parent, g, h and f values of a new node
 		c.parent = p
 		c.g = p.g + p.arc_cost(c)
 		c.h = c.calc_h(map)
 		c.f = c.g + c.h
 
-	def propagate_path_improvements(self, p):  # Updates paretn, g, h and f values if a better parent is found
+	def propagate_path_improvements(self, p):  # Updates parent, g, h and f values if a better parent is found
 		for c in p.kids:
 			if p.g + p.arc_cost(c) < c.g:
 				c.parent = p
