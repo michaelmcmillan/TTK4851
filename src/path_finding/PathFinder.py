@@ -6,14 +6,16 @@ class AStar:
 	start = None
 	search_type = None
 	map = None
+	stride = None
 
-	def __init__(self, map, search_type):  # Initialise A*
+	def __init__(self, map, search_type, stride):  # Initialise A*
 		self.start = map.map[map.start[0], map.start[1]]  # Sets the start state
 		self.search_type = search_type  # Sets search type (for module 1)
 		self.created_dict = {(self.start.state): self.start}  # place the startnode in the created dictionary
 		self.open_list = []  # open list is empty
 		self.closed_list = []  # closed list is empty
 		self.map = map
+		self.stride = stride
 
 	def best_first_search(self):
 		n0 = self.start
@@ -31,7 +33,7 @@ class AStar:
 			self.closed_list.append(x)
 			if x.is_goal(self.map):
 				return self.waypoints(x)
-			successors = x.generate_stride_successors(self.map)
+			successors = x.generate_stride_successors(self.map, self.stride)
 
 			for s in successors:
 				if (s.state) in self.created_dict:
@@ -77,7 +79,7 @@ class AStar:
 		goal_path = [x.state]
 		while x.parent:
 			x = x.parent
-			print x.x, x.y
+			print (x.x, x.y)
 			goal_path.append(x.state)
 		return goal_path[::-1]
 

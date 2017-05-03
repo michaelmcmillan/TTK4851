@@ -29,12 +29,12 @@ class Map:
         for y in range(0, self.gridHeight):
             for x in range(0, self.gridLength):
                 stdout.write(str(self.map[x, y].value))
-            print '\n'
+            print ('\n')
 
     def closenessCheck(self, c):
         #to prevent generating a path too close to the boundaries of the objects
-		#i.e: check nodes in a distance around the robot
-		raise NotImplementedError
+        #i.e: check nodes in a distance around the robot
+        raise NotImplementedError
 
 class Pixel:
     x = None							# X coordinate
